@@ -107,6 +107,7 @@ export default function AboutPage() {
               fill
               className="object-cover"
               priority
+              sizes="100vw"
             />
             <div className="absolute inset-0 bg-black/40" />
           </div>
@@ -119,6 +120,7 @@ export default function AboutPage() {
                   alt="Profile photo"
                   fill
                   className="object-cover rounded-full border-4 border-white shadow-lg"
+                  sizes="128px"
                 />
               </div>
             </div>
@@ -226,78 +228,148 @@ export default function AboutPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {aboutData.projects.map((project) => (
-                <Link
+                <div
                   key={project.id}
-                  href={project.content ? `/projects/${project.id}` : '#'}
                   className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow group ${
                     project.content ? 'cursor-pointer' : 'cursor-default'
                   }`}
                 >
-                  <div className="relative h-48 overflow-hidden">
-                    <Image
-                      src={project.image}
-                      alt={project.title}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                    {project.featured && (
-                      <div className="absolute top-4 right-4">
-                        <span className="bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">
-                          推荐
-                        </span>
+                  {project.content ? (
+                    <div className="block">
+                      <div className="relative h-48 overflow-hidden">
+                        <Image
+                          src={project.image}
+                          alt={project.title}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-300"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                        {project.featured && (
+                          <div className="absolute top-4 right-4">
+                            <span className="bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">
+                              推荐
+                            </span>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                      {project.title}
-                    </h3>
-                    <p className="text-gray-600 mb-4 text-sm leading-relaxed">
-                      {project.description}
-                    </p>
-                    
-                    {/* Technologies */}
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {project.technologies.map((tech, index) => (
-                        <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                          {tech}
-                        </span>
-                      ))}
+                      
+                      <div className="p-6">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                            {project.title}
+                          </h3>
+                          <Link 
+                            href={`/projects/${project.id}`}
+                            className="text-green-600 hover:text-green-700 text-sm font-medium"
+                          >
+                            详细介绍
+                          </Link>
+                        </div>
+                        <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                          {project.description}
+                        </p>
+                        
+                        {/* Technologies */}
+                        <div className="flex flex-wrap gap-1 mb-4">
+                          {project.technologies.map((tech, index) => (
+                            <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                        
+                        {/* External Links */}
+                        <div className="flex space-x-4">
+                          {project.demoUrl && (
+                            <a
+                              href={project.demoUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium"
+                            >
+                              <ExternalLink size={16} className="mr-1" />
+                              演示
+                            </a>
+                          )}
+                          {project.githubUrl && (
+                            <a
+                              href={project.githubUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center text-gray-600 hover:text-gray-800 text-sm font-medium"
+                            >
+                              <Github size={16} className="mr-1" />
+                              代码
+                            </a>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    
-                    {/* Links */}
-                    <div className="flex space-x-4">
-                      {project.demoUrl && (
-                        <a
-                          href={project.demoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium"
-                        >
-                          <ExternalLink size={16} className="mr-1" />
-                          演示
-                        </a>
-                      )}
-                      {project.githubUrl && (
-                        <a
-                          href={project.githubUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center text-gray-600 hover:text-gray-800 text-sm font-medium"
-                        >
-                          <Github size={16} className="mr-1" />
-                          代码
-                        </a>
-                      )}
-                      {project.content && (
-                        <span className="inline-flex items-center text-green-600 text-sm font-medium">
-                          详细介绍
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </Link>
+                  ) : (
+                    <>
+                      <div className="relative h-48 overflow-hidden">
+                        <Image
+                          src={project.image}
+                          alt={project.title}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-300"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                        {project.featured && (
+                          <div className="absolute top-4 right-4">
+                            <span className="bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">
+                              推荐
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="p-6">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                          {project.title}
+                        </h3>
+                        <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                          {project.description}
+                        </p>
+                        
+                        {/* Technologies */}
+                        <div className="flex flex-wrap gap-1 mb-4">
+                          {project.technologies.map((tech, index) => (
+                            <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                        
+                        {/* External Links */}
+                        <div className="flex space-x-4">
+                          {project.demoUrl && (
+                            <a
+                              href={project.demoUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium"
+                            >
+                              <ExternalLink size={16} className="mr-1" />
+                              演示
+                            </a>
+                          )}
+                          {project.githubUrl && (
+                            <a
+                              href={project.githubUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center text-gray-600 hover:text-gray-800 text-sm font-medium"
+                            >
+                              <Github size={16} className="mr-1" />
+                              代码
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
               ))}
             </div>
           </div>

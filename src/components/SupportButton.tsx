@@ -16,11 +16,24 @@ export default function SupportButton({ className = '', variant = 'default' }: S
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch('/api/settings');
+        console.log('SupportButton: 开始获取设置...');
+        const response = await fetch('/api/settings', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cache: 'no-store'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log('SupportButton: 设置获取成功', data);
         setCoffeeQRCode(data.coffeeQRCode || '');
       } catch (error) {
-        console.error('获取设置失败:', error);
+        console.error('SupportButton: 获取设置失败:', error);
       }
     };
 

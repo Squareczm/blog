@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import ContactForm from './ContactForm';
@@ -15,15 +17,28 @@ export default function Footer() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch('/api/settings');
+        console.log('Footer: 开始获取设置...');
+        const response = await fetch('/api/settings', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cache: 'no-store'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log('Footer: 设置获取成功', data);
         setSettings({
           aboutText: data.aboutText || settings.aboutText,
           wechatQRCode: data.wechatQRCode || '',
           coffeeQRCode: data.coffeeQRCode || ''
         });
       } catch (error) {
-        console.error('获取设置失败:', error);
+        console.error('Footer: 获取设置失败:', error);
       }
     };
 
