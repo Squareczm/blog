@@ -53,10 +53,26 @@ export default function MessagesPage() {
     ));
   };
 
-  const deleteMessage = (messageId: string) => {
-    setMessages(messages.filter(msg => msg.id !== messageId));
-    if (selectedMessage?.id === messageId) {
-      setSelectedMessage(null);
+  const deleteMessage = async (messageId: string) => {
+    if (!confirm('确定要删除这条消息吗？')) return;
+
+    try {
+      const response = await fetch(`/api/messages?id=${messageId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setMessages(messages.filter(msg => msg.id !== messageId));
+        if (selectedMessage?.id === messageId) {
+          setSelectedMessage(null);
+        }
+        alert('消息删除成功');
+      } else {
+        alert('删除失败，请重试');
+      }
+    } catch (error) {
+      console.error('删除消息失败:', error);
+      alert('删除失败，请重试');
     }
   };
 

@@ -1,11 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   const categories = [
     { name: 'AI', href: '/category/ai', description: '人工智能洞察' },
@@ -13,13 +15,25 @@ export default function Header() {
     { name: 'Life', href: '/category/life', description: '生活点滴' },
   ];
 
+  // 判断当前激活的标签
+  const getActiveCategory = () => {
+    if (pathname.includes('/category/ai')) return 'AI';
+    if (pathname.includes('/category/nova')) return 'Nova';
+    if (pathname.includes('/category/life')) return 'Life';
+    return null;
+  };
+
+  const activeCategory = getActiveCategory();
+
   return (
     <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="text-2xl font-serif font-bold text-gray-900">
-            AInovalife
+          <Link href="/" className="text-2xl font-serif font-bold">
+            <span className={activeCategory === 'AI' ? 'text-gray-900' : (activeCategory ? 'text-gray-400' : 'text-gray-900')}>AI</span>
+            <span className={activeCategory === 'Nova' ? 'text-gray-900' : (activeCategory ? 'text-gray-400' : 'text-gray-900')}>nova</span>
+            <span className={activeCategory === 'Life' ? 'text-gray-900' : (activeCategory ? 'text-gray-400' : 'text-gray-900')}>life</span>
           </Link>
 
           {/* Desktop Navigation */}

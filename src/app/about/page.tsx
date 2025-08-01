@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ExternalLink, Github, Calendar, MapPin, Mail, Phone } from 'lucide-react';
+import SupportButton from '@/components/SupportButton';
 
 interface TimelineItem {
   id: string;
@@ -225,7 +226,13 @@ export default function AboutPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {aboutData.projects.map((project) => (
-                <div key={project.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow group">
+                <Link
+                  key={project.id}
+                  href={project.content ? `/projects/${project.id}` : '#'}
+                  className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow group ${
+                    project.content ? 'cursor-pointer' : 'cursor-default'
+                  }`}
+                >
                   <div className="relative h-48 overflow-hidden">
                     <Image
                       src={project.image}
@@ -284,16 +291,13 @@ export default function AboutPage() {
                         </a>
                       )}
                       {project.content && (
-                        <Link
-                          href={`/projects/${project.id}`}
-                          className="inline-flex items-center text-green-600 hover:text-green-800 text-sm font-medium"
-                        >
+                        <span className="inline-flex items-center text-green-600 text-sm font-medium">
                           详细介绍
-                        </Link>
+                        </span>
                       )}
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -333,6 +337,7 @@ export default function AboutPage() {
                       <Mail className="w-5 h-5 mr-2" />
                       直接邮件联系
                     </a>
+                    <SupportButton />
                   </div>
                   
                   {/* Contact info */}

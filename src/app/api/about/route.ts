@@ -185,6 +185,17 @@ export async function POST(request: NextRequest) {
         global.aboutData = aboutData;
         break;
 
+      case 'update-timeline':
+        const timelineIndex = aboutData.timeline.findIndex(item => item.id === data.id);
+        if (timelineIndex !== -1) {
+          aboutData.timeline[timelineIndex] = { ...aboutData.timeline[timelineIndex], ...data };
+          aboutData.timeline.sort((a, b) => parseInt(b.year) - parseInt(a.year));
+          global.aboutData = aboutData;
+        } else {
+          return NextResponse.json({ error: '时间线项目不存在' }, { status: 404 });
+        }
+        break;
+
       case 'add-project':
         const newProject: Project = {
           id: Date.now().toString(),
@@ -192,6 +203,16 @@ export async function POST(request: NextRequest) {
         };
         aboutData.projects.push(newProject);
         global.aboutData = aboutData;
+        break;
+
+      case 'update-project':
+        const projectIndex = aboutData.projects.findIndex(project => project.id === data.id);
+        if (projectIndex !== -1) {
+          aboutData.projects[projectIndex] = { ...aboutData.projects[projectIndex], ...data };
+          global.aboutData = aboutData;
+        } else {
+          return NextResponse.json({ error: '项目不存在' }, { status: 404 });
+        }
         break;
 
       default:

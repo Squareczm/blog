@@ -1,15 +1,13 @@
-import { notFound } from 'next/navigation';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, Github, Calendar } from 'lucide-react';
-
-interface ProjectPageProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
+import { ArrowLeft, ExternalLink, Github } from 'lucide-react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import SupportButton from '@/components/SupportButton';
 
 interface Project {
   id: string;
@@ -23,30 +21,63 @@ interface Project {
   content?: string;
 }
 
-async function getProject(id: string): Promise<Project | null> {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/api/about`, {
-      cache: 'no-store'
-    });
-    
-    if (!response.ok) {
-      return null;
+export default function ProjectDetail() {
+  const params = useParams();
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        const response = await fetch('/api/about', {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        });
+        const data = await response.json();
+        const foundProject = data.projects.find((p: Project) => p.id === params.id);
+        
+        if (foundProject) {
+          setProject(foundProject);
+        } else {
+          // 项目不存在，可以重定向到关于页面
+          window.location.href = '/about';
+        }
+      } catch (error) {
+        console.error('获取项目详情失败:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (params.id) {
+      fetchProject();
     }
-    
-    const data = await response.json();
-    return data.projects?.find((project: Project) => project.id === id) || null;
-  } catch (error) {
-    console.error('获取项目详情失败:', error);
-    return null;
+  }, [params.id]);
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <main className="pt-20 min-h-screen flex items-center justify-center">
+          <div className="text-gray-500">加载中...</div>
+        </main>
+        <Footer />
+      </>
+    );
   }
-}
 
-export default async function ProjectPage({ params }: ProjectPageProps) {
-  const { id } = await params;
-  const project = await getProject(id);
-
-  if (!project || !project.content) {
-    notFound();
+  if (!project) {
+    return (
+      <>
+        <Header />
+        <main className="pt-20 min-h-screen flex items-center justify-center">
+          <div className="text-gray-500">项目不存在</div>
+        </main>
+        <Footer />
+      </>
+    );
   }
 
   return (
@@ -54,114 +85,129 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       <Header />
       
       <main className="pt-20">
-        {/* Header */}
-        <section className="py-12 bg-gray-50 border-b">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-6">
+        {/* Project Header */}
+        <section className="relative">
+          <div className="absolute inset-0">
+            <Image
+              src={project.image}
+              alt={project.title}
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-black/50" />
+          </div>
+          
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+            <div className="flex items-center mb-6">
               <Link
                 href="/about"
-                className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
+                className="inline-flex items-center text-white hover:text-gray-200 transition-colors"
               >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                返回关于页面
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                返回项目列表
               </Link>
             </div>
             
-            <div className="flex items-center space-x-3 mb-4">
-              <h1 className="text-3xl md:text-4xl font-serif font-bold text-gray-900">
-                {project.title}
-              </h1>
+            <div className="text-white">
               {project.featured && (
-                <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                <span className="inline-block bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-bold mb-4">
                   推荐项目
                 </span>
               )}
-            </div>
-            
-            <p className="text-lg text-gray-600 mb-6">
-              {project.description}
-            </p>
-            
-            {/* Technologies */}
-            <div className="flex flex-wrap gap-2 mb-6">
-              {project.technologies.map((tech, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
-                >
-                  {tech}
-                </span>
-              ))}
-            </div>
-            
-            {/* Links */}
-            <div className="flex space-x-4">
-              {project.demoUrl && (
-                <a
-                  href={project.demoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  查看演示
-                </a>
-              )}
-              {project.githubUrl && (
-                <a
-                  href={project.githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <Github className="w-4 h-4 mr-2" />
-                  查看代码
-                </a>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* Project Image */}
-        <section className="py-8">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="relative h-64 md:h-96 rounded-xl overflow-hidden shadow-lg">
-              <Image
-                src={project.image}
-                alt={project.title}
-                fill
-                className="object-cover"
-                priority
-              />
+              
+              <h1 className="text-4xl md:text-5xl font-serif font-bold mb-6">
+                {project.title}
+              </h1>
+              
+              <p className="text-xl text-gray-200 max-w-3xl leading-relaxed">
+                {project.description}
+              </p>
             </div>
           </div>
         </section>
 
         {/* Project Content */}
-        <section className="py-12 bg-white">
+        <section className="py-16">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <article 
-              className="prose prose-lg max-w-none"
-              dangerouslySetInnerHTML={{ __html: project.content }}
-            />
-          </div>
-        </section>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+              {/* Main Content */}
+              <div className="lg:col-span-2">
+                {project.content ? (
+                  <div 
+                    className="prose prose-lg max-w-none"
+                    dangerouslySetInnerHTML={{ __html: project.content }}
+                  />
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-gray-500">暂无详细内容</p>
+                  </div>
+                )}
+              </div>
 
-        {/* Related Projects or Call to Action */}
-        <section className="py-16 bg-gray-50">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-2xl font-serif font-bold text-gray-900 mb-4">
-              查看更多项目
-            </h2>
-            <p className="text-gray-600 mb-8">
-              了解我的其他作品和技术实践
-            </p>
-            <Link
-              href="/about#projects"
-              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              返回项目列表
-            </Link>
+              {/* Sidebar */}
+              <div className="space-y-8">
+                {/* Project Info */}
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">项目信息</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500 mb-2">技术栈</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {project.technologies.map((tech, index) => (
+                          <span
+                            key={index}
+                            className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {project.demoUrl && (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500 mb-2">演示链接</h4>
+                        <a
+                          href={project.demoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center text-blue-600 hover:text-blue-800"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-1" />
+                          查看演示
+                        </a>
+                      </div>
+                    )}
+
+                    {project.githubUrl && (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500 mb-2">源代码</h4>
+                        <a
+                          href={project.githubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center text-gray-600 hover:text-gray-800"
+                        >
+                          <Github className="w-4 h-4 mr-1" />
+                          查看代码
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Support */}
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">支持作者</h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    如果这个项目对您有帮助，请给作者一些鼓励
+                  </p>
+                  <SupportButton />
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </main>

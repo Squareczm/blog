@@ -24,7 +24,7 @@ const menuItems = [
   { href: '/admin/dashboard', icon: LayoutDashboard, label: '仪表盘' },
   { href: '/admin/posts', icon: FileText, label: '文章管理' },
   { href: '/admin/about', icon: User, label: '关于页面' },
-  { href: '/admin/subscribers', icon: Users, label: '订阅用户' },
+  { href: '/admin/subscribers', icon: Users, label: '联系方式' },
   { href: '/admin/messages', icon: MessageSquare, label: '消息中心' },
   { href: '/admin/settings', icon: Settings, label: '站点设置' },
   { href: '/admin/account', icon: Shield, label: '账号管理' },

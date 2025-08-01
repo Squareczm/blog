@@ -6,9 +6,10 @@ interface ImageUploadProps {
   onImageUploaded: (url: string) => void;
   currentImage?: string;
   className?: string;
+  onEdit?: () => void;
 }
 
-export default function ImageUpload({ onImageUploaded, currentImage, className = '' }: ImageUploadProps) {
+export default function ImageUpload({ onImageUploaded, currentImage, className = '', onEdit }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string>(currentImage || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -54,6 +55,7 @@ export default function ImageUpload({ onImageUploaded, currentImage, className =
   const handleRemoveImage = () => {
     setPreview('');
     onImageUploaded('');
+    onEdit?.(); // 调用编辑回调
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -61,6 +63,7 @@ export default function ImageUpload({ onImageUploaded, currentImage, className =
 
   const handleClick = () => {
     fileInputRef.current?.click();
+    onEdit?.(); // 调用编辑回调
   };
 
   return (

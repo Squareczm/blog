@@ -8,6 +8,7 @@ interface SiteSettings {
   titleAlign: 'left' | 'center' | 'right';
   subtitleAlign: 'left' | 'center' | 'right';
   copyright: string;
+  aboutText: string;
   bannerImage: string;
   wechatQRCode: string;
   coffeeQRCode: string;
@@ -20,6 +21,7 @@ export default function SettingsPage() {
     titleAlign: 'center',
     subtitleAlign: 'center',
     copyright: 'Copyright © 2025 AInovalife. All rights reserved.',
+    aboutText: '一个融合科技洞察、个人成长与生活美学的个人博客空间。在这里，科技与人文交织，理性与感性共存。',
     bannerImage: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
     wechatQRCode: '',
     coffeeQRCode: ''
@@ -49,15 +51,26 @@ export default function SettingsPage() {
     setSettings(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleImageUpload = (field: 'bannerImage' | 'wechatQRCode' | 'coffeeQRCode', file: File) => {
-    // 这里应该实现文件上传逻辑
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        handleInputChange(field, e.target.result as string);
+  const handleImageUpload = async (field: 'bannerImage' | 'wechatQRCode' | 'coffeeQRCode', file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        handleInputChange(field, result.url);
+      } else {
+        alert('图片上传失败，请重试');
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('图片上传失败:', error);
+      alert('图片上传失败，请重试');
+    }
   };
 
   const handleSave = async () => {
@@ -175,6 +188,22 @@ export default function SettingsPage() {
               onChange={(e) => handleInputChange('copyright', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+
+          <div className="mt-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              关于 AInovalife 介绍文字
+            </label>
+            <textarea
+              value={settings.aboutText}
+              onChange={(e) => handleInputChange('aboutText', e.target.value)}
+              rows={4}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              placeholder="输入关于AInovalife的介绍文字，将显示在页面底部的关于部分"
+            />
+            <p className="mt-1 text-sm text-gray-500">
+              这段文字将显示在网站底部的"关于 AInovalife"部分
+            </p>
           </div>
         </div>
 

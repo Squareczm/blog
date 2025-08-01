@@ -61,4 +61,42 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({ subscribers });
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json(
+        { error: '缺少订阅者ID' },
+        { status: 400 }
+      );
+    }
+
+    const subscriberIndex = subscribers.findIndex(sub => sub.id === id);
+    if (subscriberIndex === -1) {
+      return NextResponse.json(
+        { error: '订阅者不存在' },
+        { status: 404 }
+      );
+    }
+
+    subscribers.splice(subscriberIndex, 1);
+    global.subscribers = subscribers; // 更新全局变量
+
+    console.log('订阅者已删除:', id);
+
+    return NextResponse.json(
+      { message: '订阅者删除成功' },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('删除订阅者失败:', error);
+    return NextResponse.json(
+      { error: '删除失败' },
+      { status: 500 }
+    );
+  }
 } 

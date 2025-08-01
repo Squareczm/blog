@@ -30,7 +30,16 @@ interface Post {
 // 获取相关文章
 async function getRelatedPosts(currentPost: Post): Promise<Post[]> {
   try {
-    const response = await fetch(`/api/posts?category=${currentPost.category}&status=published&limit=4`);
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001';
+    const response = await fetch(`${baseUrl}/api/posts?category=${currentPost.category}&status=published&limit=4`, {
+      cache: 'no-store'
+    });
+    
+    if (!response.ok) {
+      console.error('获取相关文章失败: 响应状态', response.status);
+      return [];
+    }
+    
     const data = await response.json();
     return (data.posts || []).filter((post: Post) => post.id !== currentPost.id).slice(0, 3);
   } catch (error) {

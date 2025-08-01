@@ -13,6 +13,7 @@ if (!global.siteSettings) {
     titleAlign: 'center',
     subtitleAlign: 'center',
     copyright: 'Copyright © 2025 AInovalife. All rights reserved.',
+    aboutText: '一个融合科技洞察、个人成长与生活美学的个人博客空间。在这里，科技与人文交织，理性与感性共存。',
     bannerImage: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
     wechatQRCode: '',
     coffeeQRCode: ''

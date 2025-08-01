@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface RichTextEditorProps {
   value: string;
@@ -47,6 +47,13 @@ export default function RichTextEditor({ value, onChange, placeholder = '开始�
       onChange(editorRef.current.innerHTML);
     }
   };
+
+  // 当value改变时更新编辑器内容
+  useEffect(() => {
+    if (editorRef.current && editorRef.current.innerHTML !== value) {
+      editorRef.current.innerHTML = value;
+    }
+  }, [value]);
 
   return (
     <div className="border border-gray-300 rounded-lg overflow-hidden">
@@ -169,12 +176,13 @@ export default function RichTextEditor({ value, onChange, placeholder = '开始�
         contentEditable
         onInput={handleInput}
         onBlur={handleInput}
-        dangerouslySetInnerHTML={{ __html: value }}
         className="min-h-[400px] p-4 focus:outline-none prose max-w-none"
         style={{ 
           fontFamily: 'inherit',
           fontSize: 'inherit',
-          lineHeight: 'inherit'
+          lineHeight: 'inherit',
+          direction: 'ltr',
+          textAlign: 'left'
         }}
         data-placeholder={placeholder}
       />

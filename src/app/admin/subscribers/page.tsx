@@ -4,43 +4,43 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { RefreshCw } from 'lucide-react';
 
-interface Subscriber {
+interface Contact {
   id: string;
-  email: string;
-  subscribedAt: string;
-  status: 'confirmed' | 'pending';
+  contact: string;
+  createdAt: string;
+  type: 'email' | 'wechat' | 'phone';
 }
 
-export default function SubscribersPage() {
-  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+export default function ContactsPage() {
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'confirmed' | 'pending'>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'email' | 'wechat' | 'phone'>('all');
 
-  // 从API获取订阅者数据
+  // 从API获取联系方式数据
   useEffect(() => {
-    const fetchSubscribers = async () => {
+    const fetchContacts = async () => {
       try {
-        const response = await fetch('/api/subscribe', {
+        const response = await fetch('/api/contact', {
           cache: 'no-store',
           headers: {
             'Cache-Control': 'no-cache',
           },
         });
         const data = await response.json();
-        setSubscribers(data.subscribers || []);
+        setContacts(data.contacts || []);
       } catch (error) {
-        console.error('获取订阅者失败:', error);
+        console.error('获取联系方式失败:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSubscribers();
+    fetchContacts();
     
     // 每5秒自动刷新一次
-    const interval = setInterval(fetchSubscribers, 5000);
+    const interval = setInterval(fetchContacts, 5000);
     
     return () => clearInterval(interval);
   }, []);
@@ -48,39 +48,59 @@ export default function SubscribersPage() {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      const response = await fetch('/api/subscribe', {
+      const response = await fetch('/api/contact', {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache',
         },
       });
       const data = await response.json();
-      setSubscribers(data.subscribers || []);
+      setContacts(data.contacts || []);
     } catch (error) {
-      console.error('刷新订阅者失败:', error);
+      console.error('刷新联系方式失败:', error);
     } finally {
       setRefreshing(false);
     }
   };
 
-  const filteredSubscribers = subscribers.filter(subscriber => {
-    const matchesSearch = subscriber.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || subscriber.status === statusFilter;
-    return matchesSearch && matchesStatus;
+  const filteredContacts = contacts.filter(contact => {
+    const matchesSearch = contact.contact.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = typeFilter === 'all' || contact.type === typeFilter;
+    return matchesSearch && matchesType;
   });
+
+  const deleteContact = async (contactId: string) => {
+    if (!confirm('确定要删除这个联系方式吗？')) return;
+
+    try {
+      const response = await fetch(`/api/contact?id=${contactId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setContacts(contacts.filter(contact => contact.id !== contactId));
+        alert('联系方式删除成功');
+      } else {
+        alert('删除失败，请重试');
+      }
+    } catch (error) {
+      console.error('删除联系方式失败:', error);
+      alert('删除失败，请重试');
+    }
+  };
 
   const exportToCSV = () => {
     const csvContent = [
-      'Email,订阅时间,状态',
-      ...filteredSubscribers.map(sub => 
-        `${sub.email},${sub.subscribedAt},${sub.status === 'confirmed' ? '已确认' : '待确认'}`
+      '联系方式,类型,提交时间',
+      ...filteredContacts.map(contact => 
+        `${contact.contact},${contact.type === 'email' ? '邮箱' : contact.type === 'wechat' ? '微信' : '电话'},${contact.createdAt}`
       )
     ].join('\n');
     
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'subscribers.csv';
+    link.download = 'contacts.csv';
     link.click();
   };
 
@@ -99,8 +119,8 @@ export default function SubscribersPage() {
     <div className="p-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">订阅用户</h1>
-          <p className="text-gray-600">管理您的所有订阅用户</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">联系方式管理</h1>
+          <p className="text-gray-600">管理用户留下的联系方式</p>
         </div>
         <button
           onClick={handleRefresh}
@@ -118,7 +138,7 @@ export default function SubscribersPage() {
           <div className="flex-1">
             <input
               type="text"
-              placeholder="搜索邮箱..."
+              placeholder="搜索联系方式..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -126,13 +146,14 @@ export default function SubscribersPage() {
           </div>
           <div>
             <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value as any)}
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">所有状态</option>
-              <option value="confirmed">已确认</option>
-              <option value="pending">待确认</option>
+              <option value="all">所有类型</option>
+              <option value="email">邮箱</option>
+              <option value="wechat">微信</option>
+              <option value="phone">电话</option>
             </select>
           </div>
           <button
@@ -144,23 +165,23 @@ export default function SubscribersPage() {
         </div>
 
         <div className="text-sm text-gray-600">
-          共 {filteredSubscribers.length} 个订阅用户
+          共 {filteredContacts.length} 个联系方式
         </div>
       </div>
 
-      {/* Subscribers Table */}
+      {/* Contacts Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                邮箱地址
+                联系方式
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                订阅时间
+                类型
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                状态
+                提交时间
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 操作
@@ -168,26 +189,31 @@ export default function SubscribersPage() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredSubscribers.length > 0 ? (
-              filteredSubscribers.map((subscriber) => (
-                <tr key={subscriber.id} className="hover:bg-gray-50">
+            {filteredContacts.length > 0 ? (
+              filteredContacts.map((contact) => (
+                <tr key={contact.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {subscriber.email}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(subscriber.subscribedAt).toLocaleDateString()}
+                    {contact.contact}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      subscriber.status === 'confirmed' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-yellow-100 text-yellow-800'
+                      contact.type === 'email' 
+                        ? 'bg-blue-100 text-blue-800' 
+                        : contact.type === 'wechat'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-purple-100 text-purple-800'
                     }`}>
-                      {subscriber.status === 'confirmed' ? '已确认' : '待确认'}
+                      {contact.type === 'email' ? '邮箱' : contact.type === 'wechat' ? '微信' : '电话'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <button className="text-red-600 hover:text-red-900">
+                    {new Date(contact.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <button 
+                      onClick={() => deleteContact(contact.id)}
+                      className="text-red-600 hover:text-red-900"
+                    >
                       删除
                     </button>
                   </td>
@@ -196,7 +222,7 @@ export default function SubscribersPage() {
             ) : (
               <tr>
                 <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
-                  暂无订阅用户
+                  暂无联系方式
                 </td>
               </tr>
             )}

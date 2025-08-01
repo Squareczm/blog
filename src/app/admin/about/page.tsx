@@ -52,6 +52,7 @@ export default function AboutManagement() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<'intro' | 'timeline' | 'projects'>('intro');
   
   // 模态框状态
@@ -84,11 +85,15 @@ export default function AboutManagement() {
   useEffect(() => {
     fetchAboutData();
     
-    // 每10秒自动刷新一次
-    const interval = setInterval(fetchAboutData, 10000);
+    // 只有在非编辑状态下才自动刷新
+    const interval = setInterval(() => {
+      if (!isEditing) {
+        fetchAboutData();
+      }
+    }, 30000); // 改为30秒刷新一次
     
     return () => clearInterval(interval);
-  }, []);
+  }, [isEditing]);
 
   const fetchAboutData = async () => {
     try {
@@ -118,6 +123,7 @@ export default function AboutManagement() {
 
       if (response.ok) {
         alert('保存成功！');
+        setIsEditing(false); // 保存成功后退出编辑状态
       } else {
         alert('保存失败');
       }
@@ -148,10 +154,15 @@ export default function AboutManagement() {
 
   const handleAddTimeline = async () => {
     try {
-      const response = await fetch('/api/about?action=add-timeline', {
+      const action = editingTimeline ? 'update-timeline' : 'add-timeline';
+      const body = editingTimeline 
+        ? { ...timelineForm, id: editingTimeline.id }
+        : timelineForm;
+
+      const response = await fetch(`/api/about?action=${action}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(timelineForm),
+        body: JSON.stringify(body),
       });
 
       if (response.ok) {
@@ -159,10 +170,22 @@ export default function AboutManagement() {
         setAboutData(data.data);
         setShowTimelineModal(false);
         setTimelineForm({ year: '', title: '', description: '', type: 'work' });
+        setEditingTimeline(null);
       }
     } catch (error) {
-      console.error('添加时间线失败:', error);
+      console.error('保存时间线失败:', error);
     }
+  };
+
+  const handleEditTimeline = (item: TimelineItem) => {
+    setEditingTimeline(item);
+    setTimelineForm({
+      year: item.year,
+      title: item.title,
+      description: item.description,
+      type: item.type
+    });
+    setShowTimelineModal(true);
   };
 
   const handleDeleteTimeline = async (id: string) => {
@@ -184,12 +207,17 @@ export default function AboutManagement() {
 
   const handleAddProject = async () => {
     try {
+      const action = editingProject ? 'update-project' : 'add-project';
       const projectData = {
         ...projectForm,
-        technologies: projectForm.technologies.split(',').map(t => t.trim())
+        technologies: projectForm.technologies.split(',').map(t => t.trim()).filter(t => t)
       };
 
-      const response = await fetch('/api/about?action=add-project', {
+      if (editingProject) {
+        projectData.id = editingProject.id;
+      }
+
+      const response = await fetch(`/api/about?action=${action}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(projectData),
@@ -203,10 +231,26 @@ export default function AboutManagement() {
           title: '', description: '', image: '', technologies: '', 
           demoUrl: '', githubUrl: '', featured: false, content: ''
         });
+        setEditingProject(null);
       }
     } catch (error) {
-      console.error('添加项目失败:', error);
+      console.error('保存项目失败:', error);
     }
+  };
+
+  const handleEditProject = (item: Project) => {
+    setEditingProject(item);
+    setProjectForm({
+      title: item.title,
+      description: item.description,
+      image: item.image,
+      technologies: item.technologies.join(', '),
+      demoUrl: item.demoUrl || '',
+      githubUrl: item.githubUrl || '',
+      featured: item.featured,
+      content: item.content || ''
+    });
+    setShowProjectModal(true);
   };
 
   const handleDeleteProject = async (id: string) => {
@@ -241,6 +285,13 @@ export default function AboutManagement() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">关于页面管理</h1>
           <p className="mt-1 text-sm text-gray-600">管理个人简介、时间线和项目信息</p>
+          {isEditing && (
+            <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+              <p className="text-sm text-yellow-800">
+                ⚠️ 编辑模式：自动刷新已暂停，请及时保存您的修改
+              </p>
+            </div>
+          )}
         </div>
         <div className="flex space-x-3">
           <a
@@ -301,6 +352,7 @@ export default function AboutManagement() {
                   onImageUploaded={(url) => setAboutData(prev => ({ ...prev, avatar: url }))}
                   currentImage={aboutData.avatar}
                   className="max-w-xs"
+                  onEdit={() => setIsEditing(true)}
                 />
               </div>
               
@@ -312,6 +364,7 @@ export default function AboutManagement() {
                   onImageUploaded={(url) => setAboutData(prev => ({ ...prev, backgroundImage: url }))}
                   currentImage={aboutData.backgroundImage}
                   className="max-w-md"
+                  onEdit={() => setIsEditing(true)}
                 />
               </div>
               
@@ -323,6 +376,7 @@ export default function AboutManagement() {
                   type="text"
                   value={aboutData.name}
                   onChange={(e) => setAboutData(prev => ({ ...prev, name: e.target.value }))}
+                  onFocus={() => setIsEditing(true)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -335,6 +389,7 @@ export default function AboutManagement() {
                   type="text"
                   value={aboutData.title}
                   onChange={(e) => setAboutData(prev => ({ ...prev, title: e.target.value }))}
+                  onFocus={() => setIsEditing(true)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -347,6 +402,7 @@ export default function AboutManagement() {
                   type="email"
                   value={aboutData.email}
                   onChange={(e) => setAboutData(prev => ({ ...prev, email: e.target.value }))}
+                  onFocus={() => setIsEditing(true)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -359,6 +415,7 @@ export default function AboutManagement() {
                   type="text"
                   value={aboutData.location}
                   onChange={(e) => setAboutData(prev => ({ ...prev, location: e.target.value }))}
+                  onFocus={() => setIsEditing(true)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -370,7 +427,10 @@ export default function AboutManagement() {
             <h3 className="text-lg font-medium text-gray-900 mb-4">个人简介</h3>
             <RichTextEditor
               value={aboutData.introduction}
-              onChange={(value) => setAboutData(prev => ({ ...prev, introduction: value }))}
+              onChange={(value) => {
+                setAboutData(prev => ({ ...prev, introduction: value }));
+                setIsEditing(true);
+              }}
               placeholder="在这里编写您的个人简介..."
             />
           </div>
@@ -384,6 +444,7 @@ export default function AboutManagement() {
                   type="text"
                   value={newSkill}
                   onChange={(e) => setNewSkill(e.target.value)}
+                  onFocus={() => setIsEditing(true)}
                   placeholder="添加新技能..."
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
                   onKeyPress={(e) => e.key === 'Enter' && handleAddSkill()}
@@ -450,7 +511,10 @@ export default function AboutManagement() {
                       <p className="text-gray-600 mt-1">{item.description}</p>
                     </div>
                     <div className="flex space-x-2 ml-4">
-                      <button className="text-blue-600 hover:text-blue-800">
+                      <button 
+                        onClick={() => handleEditTimeline(item)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
@@ -532,7 +596,10 @@ export default function AboutManagement() {
                       </div>
                     </div>
                     <div className="flex space-x-2 ml-4">
-                      <button className="text-blue-600 hover:text-blue-800">
+                      <button 
+                        onClick={() => handleEditProject(project)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
@@ -555,7 +622,9 @@ export default function AboutManagement() {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">添加时间线项目</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                {editingTimeline ? '编辑时间线项目' : '添加时间线项目'}
+              </h3>
               <div className="space-y-4">
                 <input
                   type="text"
@@ -599,7 +668,7 @@ export default function AboutManagement() {
                   onClick={handleAddTimeline}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
-                  添加
+                  {editingTimeline ? '保存' : '添加'}
                 </button>
               </div>
             </div>
@@ -612,7 +681,9 @@ export default function AboutManagement() {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">添加项目</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                {editingProject ? '编辑项目' : '添加项目'}
+              </h3>
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 <input
                   type="text"
@@ -687,7 +758,7 @@ export default function AboutManagement() {
                   onClick={handleAddProject}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
-                  添加
+                  {editingProject ? '保存' : '添加'}
                 </button>
               </div>
             </div>
