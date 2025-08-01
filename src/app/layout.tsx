@@ -15,13 +15,20 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "AInovalife - 思考于代码之巅，行走于山川之间",
+  title: "AInovalife",
   description: "一个融合科技洞察、个人成长与生活美学的个人博客空间",
   keywords: ["AI", "技术", "成长", "生活", "博客"],
   authors: [{ name: "AInovalife" }],
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' }
+    ],
+    apple: '/favicon.svg',
+  },
   openGraph: {
     title: "AInovalife",
-    description: "思考于代码之巅，行走于山川之间",
+    description: "一个融合科技洞察、个人成长与生活美学的个人博客空间",
     type: "website",
     locale: "zh_CN",
   },
