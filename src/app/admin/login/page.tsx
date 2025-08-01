@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Lock, User } from 'lucide-react';
 
@@ -12,6 +12,32 @@ export default function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+
+  // 检查是否已经登录
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/admin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'verify',
+          }),
+        });
+
+        if (response.ok) {
+          // 已经登录，重定向到仪表盘
+          router.push('/admin/dashboard');
+        }
+      } catch (error) {
+        console.error('认证检查失败:', error);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -43,7 +69,7 @@ export default function AdminLogin() {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        localStorage.setItem('isAdminLoggedIn', 'true');
+        // 登录成功，重定向到仪表盘
         router.push('/admin/dashboard');
       } else {
         setError(result.error || '用户名或密码错误');

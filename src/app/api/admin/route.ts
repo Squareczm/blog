@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { generateToken, authenticateRequest, setAuthCookie, clearAuthCookie } from '@/lib/auth';
 
 interface AdminAccount {
   username: string;
@@ -26,7 +27,16 @@ if (!global.adminAccount) {
 
 let adminAccount = global.adminAccount;
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // 验证认证
+  const authResult = await authenticateRequest(request);
+  if (!authResult.success) {
+    return NextResponse.json(
+      { error: authResult.error },
+      { status: 401 }
+    );
+  }
+
   // 返回账号信息（不包含密码）
   const { password, ...accountInfo } = adminAccount;
   return NextResponse.json(accountInfo);
@@ -34,6 +44,15 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
+    // 验证认证
+    const authResult = await authenticateRequest(request);
+    if (!authResult.success) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: 401 }
+      );
+    }
+
     const data = await request.json();
     const { action, ...updateData } = data;
 
@@ -105,18 +124,59 @@ export async function POST(request: NextRequest) {
         adminAccount.lastLoginAt = new Date().toISOString();
         global.adminAccount = adminAccount; // 更新全局变量
         
+        // 生成 JWT Token
+        const token = await generateToken({
+          username: adminAccount.username,
+          email: adminAccount.email,
+          name: adminAccount.name,
+          role: 'admin'
+        });
+        
         const { password: pwd, ...accountInfo } = adminAccount;
         
-        return NextResponse.json(
+        const response = NextResponse.json(
           { success: true, message: '登录成功', data: accountInfo },
           { status: 200 }
         );
+        
+        // 设置认证 Cookie
+        setAuthCookie(response, token);
+        
+        return response;
       } else {
         return NextResponse.json(
           { success: false, error: '用户名或密码错误' },
           { status: 401 }
         );
       }
+    }
+
+    if (action === 'logout') {
+      const response = NextResponse.json(
+        { success: true, message: '退出成功' },
+        { status: 200 }
+      );
+      
+      // 清除认证 Cookie
+      clearAuthCookie(response);
+      
+      return response;
+    }
+
+    if (action === 'verify') {
+      // 验证当前认证状态
+      const authResult = await authenticateRequest(request);
+      if (!authResult.success) {
+        return NextResponse.json(
+          { success: false, error: authResult.error },
+          { status: 401 }
+        );
+      }
+      
+      return NextResponse.json(
+        { success: true, user: authResult.user },
+        { status: 200 }
+      );
     }
 
     return NextResponse.json(

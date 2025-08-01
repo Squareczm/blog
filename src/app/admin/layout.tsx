@@ -32,21 +32,89 @@ const menuItems = [
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    // 检查登录状态
-    const isLoggedIn = localStorage.getItem('isAdminLoggedIn');
-    if (!isLoggedIn && pathname !== '/admin/login') {
-      router.push('/admin/login');
-    }
+    // 检查认证状态
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/admin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'verify',
+          }),
+        });
+
+        if (response.ok) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+          if (pathname !== '/admin/login') {
+            router.push('/admin/login');
+          }
+        }
+      } catch (error) {
+        console.error('认证检查失败:', error);
+        setIsAuthenticated(false);
+        if (pathname !== '/admin/login') {
+          router.push('/admin/login');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
   }, [pathname, router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('isAdminLoggedIn');
-    router.push('/admin/login');
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'logout',
+        }),
+      });
+    } catch (error) {
+      console.error('退出失败:', error);
+    } finally {
+      setIsAuthenticated(false);
+      router.push('/admin/login');
+    }
   };
+
+  // 显示加载状态
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">验证中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 如果未认证且不在登录页面，显示加载状态（等待重定向）
+  if (!isAuthenticated && pathname !== '/admin/login') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">重定向到登录页面...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (pathname === '/admin/login') {
     return <>{children}</>;
