@@ -44,8 +44,8 @@
 
 1. **克隆项目**
 ```bash
-git clone https://github.com/Squareczm/personalweb.git
-cd personalweb
+git clone https://github.com/Squareczm/blog.git
+cd blog
 ```
 
 2. **安装依赖**
@@ -369,7 +369,7 @@ NEXTAUTH_URL=http://localhost:3000
 - 使用 JWT 令牌进行身份验证
 - 实现多层安全保护机制
 
-## 🐛 最近修复 (2024年更新)
+## 🐛 最近修复 (2025年1月更新)
 
 ### 🔒 安全系统完善
 - ✅ **JWT 认证系统** - 实现完整的身份验证机制
@@ -377,10 +377,12 @@ NEXTAUTH_URL=http://localhost:3000
 - ✅ **API 安全** - 所有管理员 API 添加认证验证
 - ✅ **Cookie 安全** - 使用 HttpOnly 和 Secure 标志
 
-### 💾 数据持久化重构
+### 💾 数据持久化重构 (重大更新)
 - ✅ **文件存储系统** - 从全局变量改为文件系统存储
 - ✅ **生产环境兼容** - 解决生产模式下数据丢失问题
-- ✅ **数据备份** - 自动保存所有配置和内容到 JSON 文件
+- ✅ **全API路由修复** - 修复 posts、settings、messages、subscribe 所有API
+- ✅ **数据一致性** - 确保新创建的内容在服务器重启后仍然存在
+- ✅ **缓存策略优化** - 修复文章页面从静态变为动态的问题
 
 ### 📸 图片上传系统
 - ✅ **图片上传功能** - 支持头像、背景等图片上传
@@ -393,11 +395,13 @@ NEXTAUTH_URL=http://localhost:3000
 - ✅ **ESLint 规范** - 修复代码质量问题
 - ✅ **生产构建** - 确保 `npm run build` 和 `npm start` 正常工作
 - ✅ **端口配置** - 统一开发(3001)和生产(3000)环境配置
+- ✅ **500错误修复** - 彻底解决生产模式下的500错误问题
 
 ### 🧪 测试系统
 - ✅ **单元测试** - 添加完整的测试覆盖
 - ✅ **安全测试** - 实现自动化安全检测
 - ✅ **功能验证** - 确保所有功能在生产环境正常工作
+- ✅ **生产环境测试** - 验证文章创建、访问、数据持久化等核心功能
 
 ## 🔧 故障排除
 
@@ -446,8 +450,8 @@ MIT License
 
 ## 📞 联系方式
 
-- 项目地址: https://github.com/Squareczm/personalweb
-- 问题反馈: [Issues](https://github.com/Squareczm/personalweb/issues)
+- 项目地址: https://github.com/Squareczm/blog
+- 问题反馈: [Issues](https://github.com/Squareczm/blog/issues)
 
 ---
 
