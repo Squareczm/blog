@@ -1,16 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 
-// 使用全局变量确保数据持久化
-declare global {
-  var messages: Array<{ id: string; email: string; content: string; receivedAt: string; status: 'unread' | 'read' }> | undefined;
+interface Message {
+  id: string;
+  email: string;
+  content: string;
+  receivedAt: string;
+  status: 'unread' | 'read';
 }
 
-// 初始化或使用现有的全局数据
-if (!global.messages) {
-  global.messages = [];
+const messagesFilePath = path.join(process.cwd(), 'data', 'messages.json');
+
+function readMessages(): Message[] {
+  try {
+    const data = fs.readFileSync(messagesFilePath, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('读取留言文件失败:', error);
+    return [];
+  }
 }
 
-const messages = global.messages;
+function writeMessages(messages: Message[]): void {
+  try {
+    fs.writeFileSync(messagesFilePath, JSON.stringify(messages, null, 2));
+  } catch (error) {
+    console.error('写入留言文件失败:', error);
+    throw error;
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,16 +50,17 @@ export async function POST(request: NextRequest) {
     }
 
     // 添加新留言
-    const newMessage = {
+    const newMessage: Message = {
       id: Date.now().toString(),
       email,
       content: content.trim(),
       receivedAt: new Date().toISOString(),
-      status: 'unread' as const
+      status: 'unread'
     };
 
+    const messages = readMessages();
     messages.push(newMessage);
-    global.messages = messages; // 更新全局变量
+    writeMessages(messages);
 
     console.log('新留言:', newMessage);
 
@@ -58,7 +78,16 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  return NextResponse.json({ messages });
+  try {
+    const messages = readMessages();
+    return NextResponse.json({ messages });
+  } catch (error) {
+    console.error('获取留言失败:', error);
+    return NextResponse.json(
+      { error: '获取留言失败' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function DELETE(request: NextRequest) {
@@ -73,7 +102,8 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const messageIndex = messages.findIndex(msg => msg.id === id);
+    const messages = readMessages();
+    const messageIndex = messages.findIndex((msg: Message) => msg.id === id);
     if (messageIndex === -1) {
       return NextResponse.json(
         { error: '消息不存在' },
@@ -82,7 +112,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     messages.splice(messageIndex, 1);
-    global.messages = messages; // 更新全局变量
+    writeMessages(messages);
 
     console.log('消息已删除:', id);
 

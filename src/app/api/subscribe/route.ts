@@ -1,16 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 
-// 使用全局变量确保数据在服务器重启时持久化
-declare global {
-  var subscribers: Array<{ id: string; email: string; subscribedAt: string; status: 'confirmed' | 'pending' }> | undefined;
+interface Subscriber {
+  id: string;
+  email: string;
+  subscribedAt: string;
+  status: 'confirmed' | 'pending';
 }
 
-// 初始化或使用现有的全局数据
-if (!global.subscribers) {
-  global.subscribers = [];
+const subscribersFilePath = path.join(process.cwd(), 'data', 'subscribers.json');
+
+function readSubscribers(): Subscriber[] {
+  try {
+    const data = fs.readFileSync(subscribersFilePath, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('读取订阅者文件失败:', error);
+    return [];
+  }
 }
 
-const subscribers = global.subscribers;
+function writeSubscribers(subscribers: Subscriber[]): void {
+  try {
+    fs.writeFileSync(subscribersFilePath, JSON.stringify(subscribers, null, 2));
+  } catch (error) {
+    console.error('写入订阅者文件失败:', error);
+    throw error;
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,8 +41,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const subscribers = readSubscribers();
+    
     // 检查是否已经订阅
-    const existingSubscriber = subscribers.find(sub => sub.email === email);
+    const existingSubscriber = subscribers.find((sub: Subscriber) => sub.email === email);
     if (existingSubscriber) {
       return NextResponse.json(
         { error: '该邮箱已经订阅过了' },
@@ -33,15 +53,15 @@ export async function POST(request: NextRequest) {
     }
 
     // 添加新订阅者
-    const newSubscriber = {
+    const newSubscriber: Subscriber = {
       id: Date.now().toString(),
       email,
       subscribedAt: new Date().toISOString(),
-      status: 'confirmed' as const // 简化流程，直接设为已确认
+      status: 'confirmed' // 简化流程，直接设为已确认
     };
 
     subscribers.push(newSubscriber);
-    global.subscribers = subscribers; // 更新全局变量
+    writeSubscribers(subscribers);
 
     // 这里应该发送确认邮件，暂时跳过
     console.log('新订阅者:', newSubscriber);
@@ -60,7 +80,16 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  return NextResponse.json({ subscribers });
+  try {
+    const subscribers = readSubscribers();
+    return NextResponse.json({ subscribers });
+  } catch (error) {
+    console.error('获取订阅者失败:', error);
+    return NextResponse.json(
+      { error: '获取订阅者失败' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function DELETE(request: NextRequest) {
@@ -75,7 +104,8 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const subscriberIndex = subscribers.findIndex(sub => sub.id === id);
+    const subscribers = readSubscribers();
+    const subscriberIndex = subscribers.findIndex((sub: Subscriber) => sub.id === id);
     if (subscriberIndex === -1) {
       return NextResponse.json(
         { error: '订阅者不存在' },
@@ -84,7 +114,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     subscribers.splice(subscriberIndex, 1);
-    global.subscribers = subscribers; // 更新全局变量
+    writeSubscribers(subscribers);
 
     console.log('订阅者已删除:', id);
 

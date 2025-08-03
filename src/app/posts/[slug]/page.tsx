@@ -15,7 +15,7 @@ export async function generateStaticParams() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     const response = await fetch(`${baseUrl}/api/posts?status=published`, {
-      cache: 'no-store'
+      next: { revalidate: 60 } // 60秒缓存
     });
     
     if (!response.ok) {
@@ -62,7 +62,7 @@ async function getRelatedPosts(currentPost: Post): Promise<Post[]> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     const response = await fetch(`${baseUrl}/api/posts?category=${currentPost.category}&status=published&limit=4`, {
-      cache: 'no-store'
+      next: { revalidate: 300 } // 5分钟缓存
     });
     
     if (!response.ok) {
@@ -83,7 +83,7 @@ export default async function PostPage({ params }: PostPageProps) {
   
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/posts?slug=${slug}`, {
-      cache: 'no-store'
+      next: { revalidate: 60 } // 60秒缓存
     });
     
     if (!response.ok) {
