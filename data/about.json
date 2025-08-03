@@ -1,7 +1,7 @@
 {
   "introduction": "\n    <h2>关于我</h2>\n    <p>你好！我是一名热爱技术的全栈开发者，专注于人工智能和现代Web开发技术。</p>\n    <p>我相信技术的力量可以改变世界，同时也热爱生活中的美好事物——从雪山徒步到代码编写，每一次经历都让我成长。</p>\n    <p>在这个博客中，我分享我在AI、技术学习和生活感悟方面的思考和经验。</p>\n  ",
-  "avatar": "http://localhost:3000/uploads/1754207835370-p1gogdfwd.jpg",
-  "backgroundImage": "http://localhost:3000/uploads/1754208020992-7p7lp1029.png",
+  "avatar": "http://localhost:3000/uploads/demo-avatar.jpg",
+  "backgroundImage": "http://localhost:3000/uploads/demo-background.png",
   "name": "AInova作者",
   "title": "全栈开发者 & AI研究者",
   "location": "中国，北京",

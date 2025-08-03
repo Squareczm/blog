@@ -105,6 +105,9 @@ jspm_packages/
 tmp/
 temp/
 
-# Uploaded files (keep the directory but ignore files)
+# Uploaded files (keep the directory but ignore most files)
 public/uploads/*
 !public/uploads/.gitkeep
+# Allow some sample images for demo purposes
+!public/uploads/sample-*
+!public/uploads/demo-*
