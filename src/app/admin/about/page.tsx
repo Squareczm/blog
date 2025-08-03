@@ -69,7 +69,17 @@ export default function AboutManagement() {
     type: 'work' as 'education' | 'work' | 'achievement'
   });
 
-  const [projectForm, setProjectForm] = useState({
+  const [projectForm, setProjectForm] = useState<{
+    id?: string;
+    title: string;
+    description: string;
+    image: string;
+    technologies: string;
+    demoUrl: string;
+    githubUrl: string;
+    featured: boolean;
+    content: string;
+  }>({
     title: '',
     description: '',
     image: '',
@@ -323,7 +333,7 @@ export default function AboutManagement() {
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as 'intro' | 'timeline' | 'projects')}
               className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === tab.id
                   ? 'border-blue-500 text-blue-600'
@@ -649,7 +659,7 @@ export default function AboutManagement() {
                 />
                 <select
                   value={timelineForm.type}
-                  onChange={(e) => setTimelineForm(prev => ({ ...prev, type: e.target.value as any }))}
+                  onChange={(e) => setTimelineForm(prev => ({ ...prev, type: e.target.value as 'education' | 'work' | 'achievement' }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 >
                   <option value="work">工作</option>

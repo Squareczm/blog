@@ -1,18 +1,36 @@
 // 简化的认证测试
+
+interface MockHeaders {
+  [key: string]: string;
+}
+
+interface MockCookies {
+  [key: string]: string;
+}
+
+interface MockRequest {
+  headers: {
+    get: (name: string) => string | null;
+  };
+  cookies: {
+    get: (name: string) => { value: string } | undefined;
+  };
+}
+
 describe('认证系统基础测试', () => {
   test('应该能正确提取 Authorization header', () => {
-    const headers = { authorization: 'Bearer test-token-123' };
-    const request = {
+    const headers: MockHeaders = { authorization: 'Bearer test-token-123' };
+    const request: MockRequest = {
       headers: {
         get: (name: string) => headers[name] || null,
       },
       cookies: {
-        get: (name: string) => undefined,
+        get: () => undefined,
       },
-    } as any;
+    };
     
     // 模拟 extractToken 函数
-    const extractToken = (req: any) => {
+    const extractToken = (req: MockRequest) => {
       const authHeader = req.headers.get('authorization');
       if (authHeader && authHeader.startsWith('Bearer ')) {
         return authHeader.substring(7);
@@ -25,18 +43,18 @@ describe('认证系统基础测试', () => {
   });
 
   test('应该能正确提取 Cookie', () => {
-    const cookies = { 'admin-token': 'cookie-token-123' };
-    const request = {
+    const cookies: MockCookies = { 'admin-token': 'cookie-token-123' };
+    const request: MockRequest = {
       headers: {
-        get: (name: string) => null,
+        get: () => null,
       },
       cookies: {
         get: (name: string) => cookies[name] ? { value: cookies[name] } : undefined,
       },
-    } as any;
+    };
     
     // 模拟 extractToken 函数
-    const extractToken = (req: any) => {
+    const extractToken = (req: MockRequest) => {
       const authHeader = req.headers.get('authorization');
       if (authHeader && authHeader.startsWith('Bearer ')) {
         return authHeader.substring(7);
@@ -50,19 +68,19 @@ describe('认证系统基础测试', () => {
   });
 
   test('应该优先从 Authorization header 提取 Token', () => {
-    const headers = { authorization: 'Bearer header-token-123' };
-    const cookies = { 'admin-token': 'cookie-token-123' };
-    const request = {
+    const headers: MockHeaders = { authorization: 'Bearer header-token-123' };
+    const cookies: MockCookies = { 'admin-token': 'cookie-token-123' };
+    const request: MockRequest = {
       headers: {
         get: (name: string) => headers[name] || null,
       },
       cookies: {
         get: (name: string) => cookies[name] ? { value: cookies[name] } : undefined,
       },
-    } as any;
+    };
     
     // 模拟 extractToken 函数
-    const extractToken = (req: any) => {
+    const extractToken = (req: MockRequest) => {
       const authHeader = req.headers.get('authorization');
       if (authHeader && authHeader.startsWith('Bearer ')) {
         return authHeader.substring(7);
@@ -76,17 +94,17 @@ describe('认证系统基础测试', () => {
   });
 
   test('应该在没有 Token 时返回 null', () => {
-    const request = {
+    const request: MockRequest = {
       headers: {
-        get: (name: string) => null,
+        get: () => null,
       },
       cookies: {
-        get: (name: string) => undefined,
+        get: () => undefined,
       },
-    } as any;
+    };
     
     // 模拟 extractToken 函数
-    const extractToken = (req: any) => {
+    const extractToken = (req: MockRequest) => {
       const authHeader = req.headers.get('authorization');
       if (authHeader && authHeader.startsWith('Bearer ')) {
         return authHeader.substring(7);
@@ -98,4 +116,4 @@ describe('认证系统基础测试', () => {
     const token = extractToken(request);
     expect(token).toBeNull();
   });
-}); 
+});

@@ -25,7 +25,7 @@ if (!global.adminAccount) {
   };
 }
 
-let adminAccount = global.adminAccount;
+const adminAccount = global.adminAccount;
 
 export async function GET(request: NextRequest) {
   // 验证认证

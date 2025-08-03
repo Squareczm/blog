@@ -11,11 +11,13 @@ interface Post {
   title: string;
   content: string;
   excerpt: string;
-  category: string;
+  category: 'AI' | 'Nova' | 'Life';
   status: string;
-  publishedAt: string | null;
+  publishedAt: Date;
+  updatedAt: Date;
+  published: boolean;
   slug: string;
-  featuredImage: string;
+  featuredImage?: string;
   tags: string[];
   readingTime: number;
 }

@@ -10,7 +10,7 @@ if (!global.messages) {
   global.messages = [];
 }
 
-let messages = global.messages;
+const messages = global.messages;
 
 export async function POST(request: NextRequest) {
   try {
@@ -97,4 +97,4 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

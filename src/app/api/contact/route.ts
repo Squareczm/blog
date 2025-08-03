@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+interface Contact {
+  id: string;
+  contact: string;
+  type: 'email' | 'wechat' | 'phone';
+  createdAt: string;
+}
+
 // 初始化全局变量
 declare global {
-  var contacts: any[] | undefined;
+  var contacts: Contact[] | undefined;
 }
 
 if (!global.contacts) {
@@ -42,7 +49,7 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
     };
 
-    global.contacts.push(newContact);
+    global.contacts!.push(newContact);
 
     return NextResponse.json(
       { success: true, message: '联系方式提交成功', data: newContact },
@@ -55,4 +62,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

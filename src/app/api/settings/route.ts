@@ -1,8 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+interface SiteSettings {
+  title: string;
+  subtitle: string;
+  titleAlign: string;
+  subtitleAlign: string;
+  copyright: string;
+  aboutText: string;
+  bannerImage: string;
+  wechatQRCode: string;
+  coffeeQRCode: string;
+}
+
 // 使用全局变量确保数据持久化
 declare global {
-  var siteSettings: any | undefined;
+  var siteSettings: SiteSettings | undefined;
 }
 
 // 初始化或使用现有的全局数据
@@ -47,4 +59,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

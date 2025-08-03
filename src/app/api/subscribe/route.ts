@@ -10,7 +10,7 @@ if (!global.subscribers) {
   global.subscribers = [];
 }
 
-let subscribers = global.subscribers;
+const subscribers = global.subscribers;
 
 export async function POST(request: NextRequest) {
   try {
@@ -99,4 +99,4 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

@@ -14,11 +14,13 @@ interface Post {
   title: string;
   content: string;
   excerpt: string;
-  category: string;
+  category: 'AI' | 'Nova' | 'Life';
   status: string;
-  publishedAt: string | null;
+  publishedAt: Date;
+  updatedAt: Date;
+  published: boolean;
   slug: string;
-  featuredImage: string;
+  featuredImage?: string;
   tags: string[];
   readingTime: number;
 }
@@ -54,7 +56,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   let categoryPosts: Post[] = [];
   
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/api/posts?category=${categoryKey}&status=published`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/posts?category=${categoryKey}&status=published`, {
       cache: 'no-store'
     });
     

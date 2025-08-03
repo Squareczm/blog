@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify, SignJWT } from 'jose';
 
+interface AdminJWTPayload extends Record<string, string> {
+  username: string;
+  email: string;
+  name: string;
+  role: string;
+}
+
 // JWT 密钥 - 在生产环境中应该使用环境变量
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
@@ -14,7 +21,7 @@ const JWT_CONFIG = {
 };
 
 // 生成 JWT Token
-export async function generateToken(payload: any) {
+export async function generateToken(payload: AdminJWTPayload) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -81,4 +88,4 @@ export function setAuthCookie(response: NextResponse, token: string) {
 export function clearAuthCookie(response: NextResponse) {
   response.cookies.delete('admin-token');
   return response;
-} 
+}

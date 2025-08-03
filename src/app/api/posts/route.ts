@@ -77,7 +77,7 @@ if (!global.posts) {
 ];
 }
 
-let posts = global.posts;
+const posts = global.posts;
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);

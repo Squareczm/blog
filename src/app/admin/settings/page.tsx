@@ -202,7 +202,7 @@ export default function SettingsPage() {
               placeholder="输入关于AInovalife的介绍文字，将显示在页面底部的关于部分"
             />
             <p className="mt-1 text-sm text-gray-500">
-              这段文字将显示在网站底部的"关于 AInovalife"部分
+              这段文字将显示在网站底部的&ldquo;关于 AInovalife&rdquo;部分
             </p>
           </div>
         </div>
@@ -325,4 +325,4 @@ export default function SettingsPage() {
       </div>
     </div>
   );
-} 
+}

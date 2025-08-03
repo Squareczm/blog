@@ -5,17 +5,17 @@ export async function GET() {
   const baseUrl = 'https://ainovalife.com';
   
   const staticPages = [
-    { url: '', changefreq: 'weekly', priority: 1 },
-    { url: '/about', changefreq: 'monthly', priority: 0.8 },
-    { url: '/archive', changefreq: 'weekly', priority: 0.9 },
-    { url: '/subscribe', changefreq: 'monthly', priority: 0.7 },
-    { url: '/contact', changefreq: 'monthly', priority: 0.7 },
+    { url: '', changefreq: 'weekly', priority: 1, lastmod: undefined },
+    { url: '/about', changefreq: 'monthly', priority: 0.8, lastmod: undefined },
+    { url: '/archive', changefreq: 'weekly', priority: 0.9, lastmod: undefined },
+    { url: '/subscribe', changefreq: 'monthly', priority: 0.7, lastmod: undefined },
+    { url: '/contact', changefreq: 'monthly', priority: 0.7, lastmod: undefined },
   ];
 
   const categoryPages = [
-    { url: '/category/ai', changefreq: 'weekly', priority: 0.9 },
-    { url: '/category/nova', changefreq: 'weekly', priority: 0.9 },
-    { url: '/category/life', changefreq: 'weekly', priority: 0.9 },
+    { url: '/category/ai', changefreq: 'weekly', priority: 0.9, lastmod: undefined },
+    { url: '/category/nova', changefreq: 'weekly', priority: 0.9, lastmod: undefined },
+    { url: '/category/life', changefreq: 'weekly', priority: 0.9, lastmod: undefined },
   ];
 
   const postPages = mockPosts.map(post => ({

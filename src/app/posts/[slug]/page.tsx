@@ -18,11 +18,13 @@ interface Post {
   title: string;
   content: string;
   excerpt: string;
-  category: string;
+  category: 'AI' | 'Nova' | 'Life';
   status: string;
-  publishedAt: string | null;
+  publishedAt: Date;
+  updatedAt: Date;
+  published: boolean;
   slug: string;
-  featuredImage: string;
+  featuredImage?: string;
   tags: string[];
   readingTime: number;
 }
@@ -30,7 +32,7 @@ interface Post {
 // 获取相关文章
 async function getRelatedPosts(currentPost: Post): Promise<Post[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     const response = await fetch(`${baseUrl}/api/posts?category=${currentPost.category}&status=published&limit=4`, {
       cache: 'no-store'
     });
@@ -52,7 +54,7 @@ export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params;
   
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3001'}/api/posts?slug=${slug}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/posts?slug=${slug}`, {
       cache: 'no-store'
     });
     
@@ -131,7 +133,7 @@ export default async function PostPage({ params }: PostPageProps) {
                 标签
               </h3>
               <div className="flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
+                {post.tags.map((tag: string) => (
                   <span
                     key={tag}
                     className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
