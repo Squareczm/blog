@@ -7,6 +7,34 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
+// 启用动态路由参数
+export const dynamicParams = true;
+
+// 预生成静态路由参数
+export async function generateStaticParams() {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const response = await fetch(`${baseUrl}/api/posts?status=published`, {
+      cache: 'no-store'
+    });
+    
+    if (!response.ok) {
+      console.error('获取文章列表失败:', response.status);
+      return [];
+    }
+    
+    const data = await response.json();
+    const posts = data.posts || [];
+    
+    return posts.map((post: any) => ({
+      slug: post.slug,
+    }));
+  } catch (error) {
+    console.error('生成静态参数失败:', error);
+    return [];
+  }
+}
+
 interface PostPageProps {
   params: Promise<{
     slug: string;
