@@ -4,9 +4,13 @@
 
 ## 文件说明
 
-- `about.json` - 关于页面的数据，包括个人信息、技能、时间线和项目
-- `posts.json` - 博客文章数据（如果存在）
-- `settings.json` - 网站设置数据（如果存在）
+- `about.json` - 个人信息和简介数据
+- `posts.json` - 博客文章数据
+- `settings.json` - 网站设置数据
+- `contacts.json` - 联系方式数据
+- `subscribers.json` - 订阅者数据
+- `admin.json` - 管理员账户数据
+- `messages.json` - 留言数据
 
 ## 初始化说明
 

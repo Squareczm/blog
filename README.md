@@ -83,6 +83,14 @@ npm run build
 npm start
 ```
 
+？### ⚠️ 重要提示
+
+**首次克隆项目后的设置：**
+
+1. **数据初始化**：项目包含示例数据文件，首次运行会自动创建必要的数据结构
+2. **图片显示**：项目包含示例图片 (`public/uploads/demo-*`)，确保图片功能正常工作
+3. **上传功能**：新上传的图片会保存在 `public/uploads/` 目录，但不会被 Git 跟踪
+
 ## 🧪 测试
 
 ### 运行单元测试
@@ -391,17 +399,43 @@ NEXTAUTH_URL=http://localhost:3000
 - ✅ **安全测试** - 实现自动化安全检测
 - ✅ **功能验证** - 确保所有功能在生产环境正常工作
 
+## 🔧 故障排除
+
+### 常见问题
+
+**Q: 克隆项目后图片无法显示？**
+A: 确保项目包含示例图片文件 (`public/uploads/demo-*`)，如果缺失，请重新克隆最新版本。
+
+**Q: 上传图片后刷新页面图片消失？**
+A: 检查 `data/` 目录是否存在且包含数据文件，确保数据持久化正常工作。
+
+**Q: 生产环境启动失败？**
+A: 
+1. 确保运行了 `npm run build`
+2. 检查端口 3000 是否被占用
+3. 确认环境变量配置正确
+
+**Q: 新克隆的项目功能异常？**
+A: 
+1. 删除 `node_modules` 和 `package-lock.json`
+2. 重新运行 `npm install`
+3. 确保 `.env.local` 配置正确
+4. 运行 `npm run build && npm start`
+
 ## 🤝 贡献指南
 
+欢迎提交 Issue 和 Pull Request！
+
+### 开发流程
 1. Fork 项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 打开 Pull Request
+2. 创建功能分支
+3. 提交更改
+4. 推送到分支
+5. 创建 Pull Request
 
 ## 📄 许可证
 
-本项目采用 MIT 许可证 - 查看 LICENSE 文件了解详情。
+MIT License
 
 ## 🙏 致谢
 

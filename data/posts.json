@@ -1,0 +1,41 @@
+[
+  {
+    "id": "1",
+    "title": "AI时代的思考：技术与人文的平衡",
+    "content": "# AI时代的思考：技术与人文的平衡\n\n在这个AI快速发展的时代，我们需要思考技术与人文之间的平衡...",
+    "excerpt": "探讨AI技术发展对人类社会的影响，以及如何在技术进步中保持人文关怀。",
+    "category": "ai",
+    "status": "published",
+    "publishedAt": "2024-01-15T10:00:00.000Z",
+    "slug": "ai-era-thinking",
+    "featuredImage": "http://localhost:3000/uploads/demo-background.png",
+    "tags": ["AI", "技术", "人文", "思考"],
+    "readingTime": 5
+  },
+  {
+    "id": "2",
+    "title": "Nova项目：探索未知的边界",
+    "content": "# Nova项目：探索未知的边界\n\n在创新的道路上，我们总是在探索未知的边界...",
+    "excerpt": "分享Nova项目的开发历程和技术挑战，探讨创新项目的实践经验。",
+    "category": "nova",
+    "status": "published",
+    "publishedAt": "2024-01-10T14:30:00.000Z",
+    "slug": "nova-project-exploration",
+    "featuredImage": "http://localhost:3000/uploads/demo-background.png",
+    "tags": ["Nova", "项目", "创新", "技术"],
+    "readingTime": 8
+  },
+  {
+    "id": "3",
+    "title": "雪山徒步：在自然中寻找内心的平静",
+    "content": "# 雪山徒步：在自然中寻找内心的平静\n\n在这个快节奏的时代，我们都需要偶尔停下来...",
+    "excerpt": "记录一次雪山徒步的经历，分享在自然中获得的感悟和内心的平静。",
+    "category": "life",
+    "status": "published",
+    "publishedAt": "2024-01-05T09:15:00.000Z",
+    "slug": "mountain-hiking-peace",
+    "featuredImage": "http://localhost:3000/uploads/demo-background.png",
+    "tags": ["徒步", "自然", "生活", "感悟"],
+    "readingTime": 6
+  }
+]
