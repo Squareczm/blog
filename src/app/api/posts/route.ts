@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 
 interface Post {
   id: string;
@@ -14,70 +16,35 @@ interface Post {
   readingTime: number;
 }
 
-// 使用全局变量确保数据持久化
-declare global {
-  var posts: Post[] | undefined;
-}
+const POSTS_FILE_PATH = path.join(process.cwd(), 'data', 'posts.json');
 
-// 初始化或使用现有的全局数据
-if (!global.posts) {
-  global.posts = [
-  {
-    id: '1',
-    title: '深度学习在自然语言处理中的最新进展',
-    content: '# 深度学习在自然语言处理中的最新进展\n\n自然语言处理（NLP）领域在过去几年中经历了革命性的变化...',
-    excerpt: '探索深度学习如何改变自然语言处理领域，从Transformer到GPT的发展历程。',
-    category: 'ai',
-    status: 'published',
-    publishedAt: '2024-01-15T10:00:00Z',
-    slug: 'deep-learning-nlp-progress',
-    featuredImage: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-    tags: ['深度学习', 'NLP', 'AI'],
-    readingTime: 8
-  },
-  {
-    id: '2',
-    title: '我的2024年学习计划：从零到全栈开发者',
-    content: '# 我的2024年学习计划\n\n新的一年，新的开始。我为自己制定了一个全面的学习计划...',
-    excerpt: '分享我的全栈开发学习路径，从前端到后端，从理论到实践的完整规划。',
-    category: 'nova',
-    status: 'published',
-    publishedAt: '2024-01-10T14:00:00Z',
-    slug: 'my-2024-learning-plan',
-    featuredImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-    tags: ['学习', '全栈开发', '计划'],
-    readingTime: 6
-  },
-  {
-    id: '3',
-    title: '雪山徒步：在自然中寻找内心的平静',
-    content: '# 雪山徒步：在自然中寻找内心的平静\n\n在这个快节奏的时代，我们都需要偶尔停下来...',
-    excerpt: '记录一次难忘的雪山徒步经历，分享在大自然中获得的心灵感悟。',
-    category: 'life',
-    status: 'published',
-    publishedAt: '2024-01-05T09:00:00Z',
-    slug: 'mountain-hiking-peace',
-    featuredImage: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-    tags: ['徒步', '自然', '生活感悟'],
-    readingTime: 5
-  },
-  {
-    id: '4',
-    title: 'Next.js 15 新特性详解',
-    content: '# Next.js 15 新特性详解\n\nNext.js 15 带来了许多令人兴奋的新功能...',
-    excerpt: '深入了解 Next.js 15 的新特性，包括性能优化和开发体验改进。',
-    category: 'ai',
-    status: 'draft',
-    publishedAt: null,
-    slug: 'nextjs-15-features',
-    featuredImage: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-    tags: ['Next.js', 'React', '前端'],
-    readingTime: 7
+// 读取文章数据
+function readPosts(): Post[] {
+  try {
+    if (fs.existsSync(POSTS_FILE_PATH)) {
+      const data = fs.readFileSync(POSTS_FILE_PATH, 'utf8');
+      return JSON.parse(data);
+    }
+    return [];
+  } catch (error) {
+    console.error('读取文章数据失败:', error);
+    return [];
   }
-];
 }
 
-const posts = global.posts;
+// 写入文章数据
+function writePosts(posts: Post[]): void {
+  try {
+    const dir = path.dirname(POSTS_FILE_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(POSTS_FILE_PATH, JSON.stringify(posts, null, 2));
+  } catch (error) {
+    console.error('写入文章数据失败:', error);
+    throw error;
+  }
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -86,7 +53,7 @@ export async function GET(request: NextRequest) {
   const status = searchParams.get('status');
   const limit = searchParams.get('limit');
 
-  let filteredPosts = [...posts];
+  let filteredPosts = readPosts();
 
   // 按slug查找单个文章
   if (slug) {
@@ -140,8 +107,9 @@ export async function POST(request: NextRequest) {
       readingTime: Math.ceil((data.content || '').length / 500)
     };
 
+    const posts = readPosts();
     posts.push(newPost);
-    global.posts = posts; // 更新全局变量
+    writePosts(posts);
 
     console.log('新文章已创建:', newPost);
 
@@ -163,6 +131,7 @@ export async function PUT(request: NextRequest) {
     const data = await request.json();
     const { id, ...updateData } = data;
 
+    const posts = readPosts();
     const postIndex = posts.findIndex(p => p.id === id);
     if (postIndex === -1) {
       return NextResponse.json({ error: '文章不存在' }, { status: 404 });
@@ -176,7 +145,7 @@ export async function PUT(request: NextRequest) {
         : posts[postIndex].publishedAt
     };
 
-    global.posts = posts; // 更新全局变量
+    writePosts(posts);
     console.log('文章已更新:', posts[postIndex]);
 
     return NextResponse.json(
@@ -201,13 +170,14 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: '缺少文章ID' }, { status: 400 });
     }
 
+    const posts = readPosts();
     const postIndex = posts.findIndex(p => p.id === id);
     if (postIndex === -1) {
       return NextResponse.json({ error: '文章不存在' }, { status: 404 });
     }
 
     const deletedPost = posts.splice(postIndex, 1)[0];
-    global.posts = posts; // 更新全局变量
+    writePosts(posts);
 
     console.log('文章已删除:', deletedPost);
 
