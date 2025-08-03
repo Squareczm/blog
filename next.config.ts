@@ -33,8 +33,10 @@ const nextConfig: NextConfig = {
       },
     ],
     formats: ['image/webp', 'image/avif'],
-    // 允许未优化的图片以解决本地图片问题
+    // 完全禁用图片优化以解决生产环境缓存问题
     unoptimized: true,
+    // 禁用图片缓存
+    minimumCacheTTL: 0,
     // 添加本地路径支持
     domains: [],
   },
