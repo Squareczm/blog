@@ -50,9 +50,8 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
     await writeFile(filePath, buffer);
 
-    // 生成绝对URL
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const fileUrl = `${baseUrl}/uploads/${fileName}`;
+    // 生成相对路径URL（自动适配任何域名和端口）
+    const fileUrl = `/uploads/${fileName}`;
     
     console.log('文件上传成功:', fileUrl);
     

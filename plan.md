@@ -1,58 +1,66 @@
-# 项目诊断与修复计划
+# 图片上传无法显示问题诊断与解决方案
 
-## 一、核心问题
+## 环境说明
+- 部署方式：PM2 `npm start`
+- 上传接口：`POST /api/upload`
+- 访问接口：`GET /uploads/[fileName]`
 
-1. **图片无法显示**
-   - `.gitignore` 中使用 `public/uploads/*` 排除了所有用户上传的图片文件，只保留了占位的 `.gitkeep`、`demo-*`、`sample-*`。当你在本机上传图片后，图片文件并不会被 Git 跟踪并推送至远端仓库，其他机器克隆仓库后自然拿不到真实图片，从而导致后台/前台均返回 404。
+## 问题现象
+1. 图片上传接口返回 `200`，并带有 `url` 字段（如 `http://localhost:3000/uploads/xxxx.png`）。
+2. 页面尝试加载该 URL 时出现 `ERR_CONNECTION_REFUSED` 或 `404`，图片无法显示。
+3. 创建页面、文章等功能正常。
 
-2. **文章前台 404，后台可见**
-   - 文章数据保存在 `data/posts.json`。虽然 `data/` 并未在 `.gitignore` 中排除，但如果你只在后台创建文章而忘记 `git add data/posts.json`，远端仓库仍没有这份数据。新机器克隆后，前端渲染阶段读取不到对应文章，于是访问时 404，而后台使用本地 API 写入/读取，则能读取到空或新生成的默认文件，从而出现不一致。
-   - 另外，Next.js 若在 **构建时**（`npm run build`）读取了旧的 `posts.json`，构建出的静态页面就固化了旧内容；后续运行时即使 `posts.json` 被更新，也不会自动再生成静态路由，导致新增文章访问 404。
+## 根本原因
+### 1. 绝对 URL 指向错误域名/端口（最常见）
+`src/app/api/upload/route.ts` 生成链接时：
+```ts
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+const fileUrl = `${baseUrl}/uploads/${fileName}`;
+```
+生产环境未设置 `NEXT_PUBLIC_BASE_URL` → 默认 `http://localhost:3000` → 浏览器请求本机而非服务器。
 
-## 二、解决思路
+### 2. 上传目录的持久化与权限
+- 图片写入 `public/uploads`；若目录不可写或容器/CI 部署覆盖，文件可能丢失。
 
-- **文件持久化策略**
-  - 短期：确保所有动态产生、需要线上展示的内容都进入版本控制；或者在部署流程中把 `data/` 与 `public/uploads/` 同步到共享存储。
-  - 长期：将文件上传迁移到对象存储（S3、OSS 等），将结构化数据迁移到数据库（SQLite、PostgreSQL、MongoDB 等），彻底摆脱文件系统依赖。
+### 3. 反向代理端口不一致
+- Nginx/Caddy 将 80/443 转发到 3000，但上传 URL 包含 3000 端口，直接通过 80/443 访问会 404/拒绝连接。
 
-## 三、具体修复计划
+## 解决方案一览
+| 优先级 | 方案 | 说明 |
+| ------ | ---- | ---- |
+| ★★★ | 设置 `NEXT_PUBLIC_BASE_URL` | `.env.production` 或 PM2 json 中设置实际域名，如 `https://your-domain.com`，重新构建并重启 |
+| ★★☆ | 改为返回 **相对路径** | 上传接口返回 `/uploads/${fileName}`，前端直接使用，天然兼容域名与端口 |
+| ★★☆ | 前端使用 `window.location.origin` 拼接 | 客户端构造绝对地址，无需后端硬编码 |
+| ★★☆ | 反向代理映射 `/uploads` | Nginx `alias /app/public/uploads/` 确保静态文件可访问 |
+| ★☆☆ | 持久化 `public/uploads` | 挂载卷或云存储，确保文件不会因重启丢失 |
 
-| 步骤 | 动作 | 说明 | 状态 |
-| ---- | ---- | ---- | ---- |
-| 1 | **调整 `.gitignore`** | 删除或注释 `public/uploads/*`，改为只排除临时或演示文件。| ✅ 已完成 |
-| 2 | **补提交历史文件** | `git add public/uploads/* data/*.json` 并推送，保证远端仓库包含真实资源。| ✅ 已完成 |
-| 3 | **完善发布指令** | 在 CI / 部署脚本中增加 `npm run build` 前的 `git pull` 及静态重建。| ✅ 已完成 |
-| 4 | **改进数据持久化** (可选)| 评估迁移到数据库以及使用云存储以消除多机环境差异。| 🔄 待评估 |
-| 5 | **动态路由再验证** | 若继续使用文件系统，确保文章页面使用 `dynamicParams` 或 `revalidate`，避免需要手动重新构建。| ✅ 已完成 |
+## 推荐实施步骤
+1. **✅ 已实施：接口改造（相对路径）**
+   ```ts
+   // upload/route.ts - 已修改
+   // const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'; (已删除)
+   const fileUrl = `/uploads/${fileName}`; // 现在返回相对路径
+   ```
+   **优势**：自动适配任何域名和端口，无需配置环境变量
 
-## 已完成的修复
+2. **(备选) 环境变量方案**
+   ```bash
+   export NEXT_PUBLIC_BASE_URL=https://your-domain.com
+   npm run build
+   pm2 restart app
+   ```
+3. **(可选) Nginx 配置**
+   ```nginx
+   location /uploads/ {
+     alias /path/to/app/public/uploads/;
+   }
+   ```
+4. **权限与持久化**
+   ```bash
+   chmod -R 755 public/uploads
+   ```
+   或 Docker `-v uploads:/app/public/uploads`。
+5. **验证**
+   上传图片 → 访问 `https://your-domain.com/uploads/<file>` 应返回 200 并显示。
 
-### 1. `.gitignore` 调整
-- 移除了 `public/uploads/*` 的全局排除
-- 改为只排除临时文件 (`temp-*`, `*.tmp`)
-- 保留目录结构文件 (`.gitkeep`)
-
-### 2. 文件同步
-- 添加了 15 个用户上传的图片文件到版本控制
-- 更新了 `data/about.json` 等数据文件
-- 提交了所有必要的资源文件
-
-### 3. 动态路由优化
-- 在 `/posts/[slug]/page.tsx` 中添加了 `dynamicParams = true`
-- 实现了 `generateStaticParams` 函数预生成静态路由
-- 保持了 `cache: 'no-store'` 确保数据实时性
-
-### 4. 部署脚本
-- 创建了 `scripts/deploy.sh` 部署脚本
-- 包含数据文件检查、依赖安装、测试、构建等完整流程
-- 确保部署时数据同步和正确构建
-
-## 四、后续改进建议
-
-1. **CI 自动校验**：在 Pull Request 中自动检测 `data/posts.json` 与 `public/uploads/` 是否包含未提交内容。
-2. **备份策略**：定期将 `data/`、`public/uploads/` 打包备份到远程。
-3. **迁移计划**：逐步将图片上传接入云存储，将结构化数据迁移至数据库，以提高伸缩性与可靠性。
-
----
-
-> 以上为当前诊断与修复步骤，执行完 1~3 步即可解决克隆后图片与文章缺失问题，4~5 步为长期优化方向。
+完成以上步骤后，图片上传与显示问题应得到彻底解决，并保证在多实例/重启场景下依然可用。
