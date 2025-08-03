@@ -1,0 +1,86 @@
+{
+  "introduction": "\n    <h2>关于我</h2>\n    <p>你好！我是一名热爱技术的全栈开发者，专注于人工智能和现代Web开发技术。</p>\n    <p>我相信技术的力量可以改变世界，同时也热爱生活中的美好事物——从雪山徒步到代码编写，每一次经历都让我成长。</p>\n    <p>在这个博客中，我分享我在AI、技术学习和生活感悟方面的思考和经验。</p>\n  ",
+  "avatar": "http://localhost:3000/uploads/1754207835370-p1gogdfwd.jpg",
+  "backgroundImage": "http://localhost:3000/uploads/1754208020992-7p7lp1029.png",
+  "name": "AInova作者",
+  "title": "全栈开发者 & AI研究者",
+  "location": "中国，北京",
+  "email": "contact@ainovalife.com",
+  "skills": [
+    "JavaScript/TypeScript",
+    "React/Next.js",
+    "Node.js",
+    "Python",
+    "Machine Learning",
+    "Deep Learning",
+    "TensorFlow",
+    "PyTorch",
+    "AWS/云服务",
+    "Docker",
+    "Git",
+    "Agile开发"
+  ],
+  "timeline": [
+    {
+      "id": "1",
+      "year": "2024",
+      "title": "开始AI博客创作",
+      "description": "创建AInovalife博客，分享AI技术和生活感悟",
+      "type": "achievement"
+    },
+    {
+      "id": "2",
+      "year": "2023",
+      "title": "全栈开发工程师",
+      "description": "专注于React、Node.js和AI技术栈的开发工作",
+      "type": "work"
+    },
+    {
+      "id": "3",
+      "year": "2022",
+      "title": "计算机科学硕士毕业",
+      "description": "专业方向：人工智能与机器学习",
+      "type": "education"
+    },
+    {
+      "id": "4",
+      "year": "2020",
+      "title": "开始机器学习研究",
+      "description": "深入学习深度学习和自然语言处理技术",
+      "type": "achievement"
+    }
+  ],
+  "projects": [
+    {
+      "id": "1",
+      "title": "AInovalife博客系统",
+      "description": "基于Next.js构建的个人博客平台，支持内容管理和用户交互",
+      "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      "technologies": [
+        "Next.js",
+        "TypeScript",
+        "Tailwind CSS",
+        "React"
+      ],
+      "demoUrl": "https://ainovalife.com",
+      "githubUrl": "https://github.com/user/ainovalife",
+      "featured": true,
+      "content": "\n        <h3>项目概述</h3>\n        <p>AInovalife是一个现代化的个人博客平台，采用Next.js 15和TypeScript构建。</p>\n        \n        <h3>主要特性</h3>\n        <ul>\n          <li>响应式设计，支持移动端和桌面端</li>\n          <li>完整的内容管理系统</li>\n          <li>用户订阅和留言功能</li>\n          <li>分类和标签管理</li>\n          <li>SEO优化</li>\n        </ul>\n        \n        <h3>技术栈</h3>\n        <p>前端使用Next.js 15、TypeScript和Tailwind CSS，后端API使用Next.js的App Router。</p>\n      "
+    },
+    {
+      "id": "2",
+      "title": "AI文本分析工具",
+      "description": "使用机器学习技术分析文本情感和主题的Web应用",
+      "image": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+      "technologies": [
+        "Python",
+        "Flask",
+        "scikit-learn",
+        "NLTK"
+      ],
+      "githubUrl": "https://github.com/user/ai-text-analyzer",
+      "featured": false,
+      "content": "\n        <h3>项目概述</h3>\n        <p>基于自然语言处理技术的文本分析工具，可以分析文本的情感倾向和主题分类。</p>\n        \n        <h3>功能特性</h3>\n        <ul>\n          <li>文本情感分析</li>\n          <li>主题分类</li>\n          <li>关键词提取</li>\n          <li>批量处理</li>\n        </ul>\n      "
+    }
+  ]
+}

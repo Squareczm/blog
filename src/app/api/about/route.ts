@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { readJsonFile, writeJsonFile, DATA_FILES } from '@/lib/storage';
 
 interface TimelineItem {
   id: string;
@@ -33,14 +34,8 @@ interface AboutData {
   projects: Project[];
 }
 
-// 使用全局变量确保数据持久化
-declare global {
-  var aboutData: AboutData | undefined;
-}
-
-// 初始化或使用现有的全局数据
-if (!global.aboutData) {
-  global.aboutData = {
+// 默认数据
+const defaultAboutData: AboutData = {
   introduction: `
     <h2>关于我</h2>
     <p>你好！我是一名热爱技术的全栈开发者，专注于人工智能和现代Web开发技术。</p>
@@ -138,24 +133,29 @@ if (!global.aboutData) {
     }
   ]
 };
-}
-
-let aboutData = global.aboutData;
 
 export async function GET() {
-  return NextResponse.json(aboutData);
+  try {
+    const aboutData = await readJsonFile(DATA_FILES.ABOUT, defaultAboutData);
+    return NextResponse.json(aboutData);
+  } catch (error) {
+    console.error('读取关于页面数据失败:', error);
+    return NextResponse.json(defaultAboutData);
+  }
 }
 
 export async function PUT(request: NextRequest) {
   try {
     const data = await request.json();
-    aboutData = { ...aboutData, ...data };
-    global.aboutData = aboutData; // 更新全局变量
+    const currentData = await readJsonFile(DATA_FILES.ABOUT, defaultAboutData);
+    const updatedData = { ...currentData, ...data };
     
-    console.log('关于页面数据已更新:', aboutData);
+    await writeJsonFile(DATA_FILES.ABOUT, updatedData);
+    
+    console.log('关于页面数据已更新:', updatedData);
     
     return NextResponse.json(
-      { message: '更新成功', data: aboutData },
+      { message: '更新成功', data: updatedData },
       { status: 200 }
     );
   } catch (error) {
@@ -173,6 +173,8 @@ export async function POST(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
     const data = await request.json();
+    
+    const aboutData = await readJsonFile(DATA_FILES.ABOUT, defaultAboutData);
 
     switch (action) {
       case 'add-timeline':
@@ -182,7 +184,6 @@ export async function POST(request: NextRequest) {
         };
         aboutData.timeline.push(newTimelineItem);
         aboutData.timeline.sort((a, b) => parseInt(b.year) - parseInt(a.year));
-        global.aboutData = aboutData;
         break;
 
       case 'update-timeline':
@@ -190,7 +191,6 @@ export async function POST(request: NextRequest) {
         if (timelineIndex !== -1) {
           aboutData.timeline[timelineIndex] = { ...aboutData.timeline[timelineIndex], ...data };
           aboutData.timeline.sort((a, b) => parseInt(b.year) - parseInt(a.year));
-          global.aboutData = aboutData;
         } else {
           return NextResponse.json({ error: '时间线项目不存在' }, { status: 404 });
         }
@@ -202,14 +202,12 @@ export async function POST(request: NextRequest) {
           ...data
         };
         aboutData.projects.push(newProject);
-        global.aboutData = aboutData;
         break;
 
       case 'update-project':
         const projectIndex = aboutData.projects.findIndex(project => project.id === data.id);
         if (projectIndex !== -1) {
           aboutData.projects[projectIndex] = { ...aboutData.projects[projectIndex], ...data };
-          global.aboutData = aboutData;
         } else {
           return NextResponse.json({ error: '项目不存在' }, { status: 404 });
         }
@@ -219,14 +217,16 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: '无效的操作' }, { status: 400 });
     }
 
+    await writeJsonFile(DATA_FILES.ABOUT, aboutData);
+
     return NextResponse.json(
-      { message: '添加成功', data: aboutData },
+      { message: '操作成功', data: aboutData },
       { status: 201 }
     );
   } catch (error) {
-    console.error('添加数据失败:', error);
+    console.error('操作数据失败:', error);
     return NextResponse.json(
-      { error: '添加失败' },
+      { error: '操作失败' },
       { status: 500 }
     );
   }
@@ -242,20 +242,22 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: '缺少参数' }, { status: 400 });
     }
 
+    const aboutData = await readJsonFile(DATA_FILES.ABOUT, defaultAboutData);
+
     switch (type) {
       case 'timeline':
         aboutData.timeline = aboutData.timeline.filter(item => item.id !== id);
-        global.aboutData = aboutData;
         break;
 
       case 'project':
         aboutData.projects = aboutData.projects.filter(project => project.id !== id);
-        global.aboutData = aboutData;
         break;
 
       default:
         return NextResponse.json({ error: '无效的类型' }, { status: 400 });
     }
+
+    await writeJsonFile(DATA_FILES.ABOUT, aboutData);
 
     return NextResponse.json(
       { message: '删除成功', data: aboutData },
