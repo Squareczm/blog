@@ -2,124 +2,116 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-### 说中文！！！！！！！！！
+## Development Commands
 
-## Project Overview
+### Core Commands
+- `npm run dev` - Start dev server on port 3001 with Turbopack
+- `npm run build` - Production build
+- `npm run start` - Start production server on port 3000
+- `npm run lint` - ESLint check
 
-AInovalife is a modern personal website system built with Next.js 15 and TypeScript, featuring comprehensive admin functionality and robust security mechanisms. The system includes dynamic content management, article system, project showcase, contact forms, and donation/support features.
+### Testing Commands
+- `npm test` - Run Jest tests
+- `npm run test:watch` - Watch mode testing
+- `npm run test:security` - Security validation tests
 
-## Key Commands
-
-### Development
-- `npm run dev` - Start development server on port 3001
-- `npm run build` - Build production bundle
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-
-### Testing
-- `npm test` - Run Jest unit tests
-- `npm run test:watch` - Run tests in watch mode
-- `npm run test:security` - Run security tests (node scripts/security-test.js)
-
-### Environment Setup
-- Copy `.env.example` to `.env.local` for environment variables
-- Default admin: `admin` / `password123`
-- Default port: 3001 (configured in package.json)
+### Single Test Execution
+- `npm test -- --testNamePattern="auth"` - Run specific test
+- `npm test -- --watch --testNamePattern="component"` - Watch specific tests
 
 ## Architecture Overview
 
-### Technology Stack
-- **Framework**: Next.js 15 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS v4
-- **Authentication**: JWT (jose library)
-- **Testing**: Jest + React Testing Library
-- **Icons**: Lucide React
+### Core Data Flow
+- **Storage Layer**: `src/lib/storage.ts` handles JSON file persistence
+- **Data Layer**: Global state management via `src/lib/data.ts` (singleton pattern)
+- **API Layer**: RESTful endpoints in `src/app/api/` routes
+- **Presentation Layer**: Server components with client-side interactivity
 
 ### Security Architecture
-- **JWT Authentication**: 24-hour token expiration with HttpOnly cookies
-- **Middleware Protection**: Automatic redirection for unauthenticated admin routes
-- **Multi-layer Security**: Client, server, and middleware protection
-- **Cookie Security**: HttpOnly + Secure + SameSite Strict
-- **Route Protection**: All `/admin/*` routes protected except `/admin/login`
+- **JWT-based Auth**: 24h tokens via `jose` library
+- **Middleware Protection**: `src/middleware.ts` guards `/admin/*` routes
+- **Cookie Security**: HttpOnly, Secure (prod), SameSite=strict
+- **Triple Validation**: Client → Middleware → API route
 
-### File Structure
+### Key Architectural Patterns
+
+#### Data Persistence Pattern
 ```
-src/
-├── app/                    # Next.js App Router
-│   ├── admin/             # Admin dashboard routes
-│   ├── api/               # API endpoints
-│   ├── posts/             # Public post pages
-│   ├── projects/          # Project showcase
-│   └── ...
-├── components/            # Reusable React components
-├── lib/                   # Core utilities
-│   ├── auth.ts           # JWT authentication
-│   ├── data.ts           # Data management
-│   └── markdown.ts       # Markdown processing
-├── types/                 # TypeScript definitions
-└── middleware.ts          # Route protection
+File System (data/*.json) → storage.ts → data.ts → API Routes → Components
 ```
 
-### Key Components
+#### Authentication Flow
+```
+Login → JWT Token → HttpOnly Cookie → Middleware Validation → API Access
+```
 
-#### Authentication System (src/lib/auth.ts)
-- `generateToken(payload)` - Create JWT tokens
-- `verifyToken(token)` - Validate JWT tokens
-- `authenticateRequest(request)` - API route authentication
-- `setAuthCookie(response, token)` - Secure cookie handling
+#### Route Organization
+- **Public Routes**: `/`, `/posts/*`, `/about`, `/contact`, `/projects/*`
+- **Protected Admin**: `/admin/*` (except `/admin/login`)
+- **API Routes**: `/api/*` (admin routes require JWT)
 
-#### Data Management
-- Global variable persistence for:
-  - `siteSettings` - Site configuration
-  - `posts` - Article data
-  - `contacts` - Contact information
-  - `messages` - User messages
-  - `aboutData` - Personal information
-  - `adminAccount` - Admin credentials
+### Critical Files to Understand
 
-#### API Structure
-- **Admin routes**: `/api/admin/*` (JWT protected)
-- **Public routes**: `/api/posts`, `/api/contact`, etc.
-- **File uploads**: `/api/upload` for images
-- **Settings**: `/api/settings` for site configuration
+#### Storage System (`src/lib/storage.ts`)
+- JSON file persistence with automatic directory creation
+- Handles all data: posts, settings, messages, contacts
+- Production-safe file operations
+
+#### Auth System (`src/lib/auth.ts`)
+- JWT token generation/validation
+- Request authentication helpers
+- Cookie management utilities
+
+#### Data Management (`src/lib/data.ts`)
+- Singleton pattern for in-memory caching
+- Interface between storage and API routes
+- Type-safe data access
+
+#### Middleware (`src/middleware.ts`)
+- Route protection logic
+- Token validation strategy
+- Redirect handling for unauthorized access
+
+### Type System
+- **Post**: Article content with AI/Nova/Life categories
+- **Project**: Portfolio items with tech stacks
+- **Message**: Contact form submissions
+- **SiteSettings**: Global configuration
+- **TimelineEvent**: Personal timeline data
 
 ### Development Patterns
 
-#### Adding New Features
-1. Create API route in `src/app/api/`
-2. Create component in `src/components/`
-3. Create page in `src/app/`
-4. Update types in `src/types/index.ts`
+#### Adding New Data Type
+1. Define type in `src/types/index.ts`
+2. Add data file constant in `src/lib/storage.ts`
+3. Create API route in `src/app/api/[type]/route.ts`
+4. Update admin UI in `src/app/admin/[type]/`
 
-#### Testing Structure
-- Unit tests in `src/__tests__/`
-- Security tests in `scripts/security-test.js`
-- Jest configuration in `jest.config.js`
-- Setup file: `jest.setup.js`
+#### Image Upload Flow
+1. Client uploads via `/api/upload`
+2. Files saved to `public/uploads/`
+3. URLs returned as absolute paths
+4. Next.js Image component configured for local files
 
-#### Type Definitions
-- Posts: `Post` interface with AI/Nova/Life categories
-- Projects: `Project` interface with technology tags
-- Messages: `Message` interface for contact forms
-- Settings: `SiteSettings` for site configuration
+#### Component Structure
+- **Server Components**: Default for pages
+- **Client Components**: Only when interactivity needed
+- **Shared Components**: Reusable UI elements in `src/components/`
 
-### Environment Variables
-```bash
+### Environment Setup
+Required `.env.local`:
+```
 JWT_SECRET=your-secret-key
-NODE_ENV=development
 NEXT_PUBLIC_BASE_URL=http://localhost:3001
 ```
 
-### Security Notes
-- All admin routes require authentication via middleware
-- JWT tokens expire after 24 hours
-- File uploads limited to images
-- Input validation on all API endpoints
-- Secure cookie configuration for production
+### Testing Strategy
+- **Unit Tests**: Jest with React Testing Library
+- **Security Tests**: Automated auth validation
+- **Integration**: API endpoint testing via security test suite
 
-### Common Tasks
-- **Content Management**: Use admin dashboard at `/admin`
-- **Image Uploads**: Via `/api/upload` endpoint
-- **Settings Updates**: Via `/api/settings` endpoint
-- **Testing**: Run security tests after authentication changes
+### Production Considerations
+- Data persists via JSON files in `data/` directory
+- Images stored in `public/uploads/` (git-ignored)
+- Port 3001 for dev, 3000 for production
+- Default admin: admin/password123 (change immediately)
