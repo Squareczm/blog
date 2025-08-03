@@ -5,7 +5,7 @@
   "subtitleAlign": "center",
   "copyright": "© 2024 AI Nova Life. All rights reserved.",
   "aboutText": "一个专注于AI技术、创新项目和生活感悟的个人博客。在这里，我分享技术思考、项目经验和生活中的美好瞬间。",
-  "bannerImage": "http://localhost:3000/uploads/demo-background.png",
+  "bannerImage": "/uploads/demo-background.png",
   "wechatQRCode": "",
   "coffeeQRCode": ""
 }

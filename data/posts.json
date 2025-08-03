@@ -8,8 +8,13 @@
     "status": "published",
     "publishedAt": "2024-01-15T10:00:00.000Z",
     "slug": "ai-era-thinking",
-    "featuredImage": "http://localhost:3000/uploads/demo-background.png",
-    "tags": ["AI", "技术", "人文", "思考"],
+    "featuredImage": "/uploads/demo-background.png",
+    "tags": [
+      "AI",
+      "技术",
+      "人文",
+      "思考"
+    ],
     "readingTime": 5
   },
   {
@@ -21,8 +26,13 @@
     "status": "published",
     "publishedAt": "2024-01-10T14:30:00.000Z",
     "slug": "nova-project-exploration",
-    "featuredImage": "http://localhost:3000/uploads/demo-background.png",
-    "tags": ["Nova", "项目", "创新", "技术"],
+    "featuredImage": "/uploads/demo-background.png",
+    "tags": [
+      "Nova",
+      "项目",
+      "创新",
+      "技术"
+    ],
     "readingTime": 8
   },
   {
@@ -34,8 +44,26 @@
     "status": "published",
     "publishedAt": "2024-01-05T09:15:00.000Z",
     "slug": "mountain-hiking-peace",
-    "featuredImage": "http://localhost:3000/uploads/demo-background.png",
-    "tags": ["徒步", "自然", "生活", "感悟"],
+    "featuredImage": "/uploads/demo-background.png",
+    "tags": [
+      "徒步",
+      "自然",
+      "生活",
+      "感悟"
+    ],
     "readingTime": 6
+  },
+  {
+    "id": "1754210699853",
+    "title": "t s t",
+    "content": "s t s",
+    "excerpt": "s t",
+    "category": "ai",
+    "status": "published",
+    "publishedAt": "2025-08-03T08:44:59.853Z",
+    "slug": "t-s-t",
+    "featuredImage": "/uploads/1754210696380-b1zx6w5wo.jpg",
+    "tags": [],
+    "readingTime": 1
   }
 ]

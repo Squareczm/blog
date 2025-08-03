@@ -52,17 +52,22 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     notFound();
   }
 
-  // 从API获取该分类的文章
+  // 从文件直接获取该分类的文章
   let categoryPosts: Post[] = [];
   
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/posts?category=${categoryKey}&status=published`, {
-      cache: 'no-store'
-    });
+    const fs = await import('fs');
+    const path = await import('path');
     
-    if (response.ok) {
-      const data = await response.json();
-      categoryPosts = data.posts || [];
+    const POSTS_FILE_PATH = path.join(process.cwd(), 'data', 'posts.json');
+    
+    if (fs.existsSync(POSTS_FILE_PATH)) {
+      const data = fs.readFileSync(POSTS_FILE_PATH, 'utf8');
+      const allPosts = JSON.parse(data);
+      
+      categoryPosts = allPosts.filter((post: any) => 
+        post.category === categoryKey && post.status === 'published'
+      );
     }
   } catch (error) {
     console.error('获取分类文章失败:', error);

@@ -60,18 +60,26 @@ interface Post {
 // 获取相关文章
 async function getRelatedPosts(currentPost: Post): Promise<Post[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/posts?category=${currentPost.category}&status=published&limit=4`, {
-      next: { revalidate: 300 } // 5分钟缓存
-    });
+    // 在服务器端直接读取文件数据
+    const fs = await import('fs');
+    const path = await import('path');
     
-    if (!response.ok) {
-      console.error('获取相关文章失败: 响应状态', response.status);
-      return [];
+    const POSTS_FILE_PATH = path.join(process.cwd(), 'data', 'posts.json');
+    
+    if (fs.existsSync(POSTS_FILE_PATH)) {
+      const data = fs.readFileSync(POSTS_FILE_PATH, 'utf8');
+      const allPosts = JSON.parse(data);
+      
+      return allPosts
+        .filter((post: any) => 
+          post.category === currentPost.category && 
+          post.status === 'published' && 
+          post.id !== currentPost.id
+        )
+        .slice(0, 3);
     }
     
-    const data = await response.json();
-    return (data.posts || []).filter((post: Post) => post.id !== currentPost.id).slice(0, 3);
+    return [];
   } catch (error) {
     console.error('获取相关文章失败:', error);
     return [];
@@ -82,16 +90,19 @@ export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params;
   
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/posts?slug=${slug}`, {
-      next: { revalidate: 60 } // 60秒缓存
-    });
+    // 在服务器端直接读取文件数据
+    const fs = await import('fs');
+    const path = await import('path');
     
-    if (!response.ok) {
+    const POSTS_FILE_PATH = path.join(process.cwd(), 'data', 'posts.json');
+    
+    if (!fs.existsSync(POSTS_FILE_PATH)) {
       notFound();
     }
     
-    const data = await response.json();
-    const post = data.post;
+    const data = fs.readFileSync(POSTS_FILE_PATH, 'utf8');
+    const allPosts = JSON.parse(data);
+    const post = allPosts.find((p: any) => p.slug === slug);
     
     if (!post) {
       notFound();

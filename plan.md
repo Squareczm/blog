@@ -1,5 +1,9 @@
 # 图片上传无法显示问题诊断与解决方案
 
+## 问题状态
+- ✅ **已解决**：图片上传显示问题已修复
+- ✅ **生产环境**：服务器启动正常，无错误
+
 ## 环境说明
 - 部署方式：PM2 `npm start`
 - 上传接口：`POST /api/upload`
@@ -33,6 +37,23 @@ const fileUrl = `${baseUrl}/uploads/${fileName}`;
 | ★★☆ | 前端使用 `window.location.origin` 拼接 | 客户端构造绝对地址，无需后端硬编码 |
 | ★★☆ | 反向代理映射 `/uploads` | Nginx `alias /app/public/uploads/` 确保静态文件可访问 |
 | ★☆☆ | 持久化 `public/uploads` | 挂载卷或云存储，确保文件不会因重启丢失 |
+
+## 解决过程记录
+
+### ✅ 已解决：启动错误修复
+**问题**：`npm start` 时出现 `TypeError: routesManifest.dataRoutes is not iterable`
+**解决方案**：
+1. 清理构建缓存：`rm -rf .next node_modules package-lock.json`
+2. 重新安装依赖：`npm install`
+3. 重新构建项目：`npm run build`
+4. 启动生产服务器：`npm start`
+
+### ✅ 已解决：数据文件中的硬编码localhost问题
+**问题**：`data/about.json`、`data/settings.json`、`data/posts.json` 中的图片URL硬编码为 `http://localhost:3000`
+**解决方案**：
+1. 将所有图片URL从绝对路径改为相对路径（如 `/uploads/xxx.png`）
+2. 修复页面组件中的API调用，使用直接文件读取而非HTTP请求
+3. 避免服务器端渲染时的localhost依赖问题
 
 ## 推荐实施步骤
 1. **✅ 已实施：接口改造（相对路径）**
