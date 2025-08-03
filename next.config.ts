@@ -19,8 +19,24 @@ const nextConfig: NextConfig = {
         port: '3000',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**',
+        port: '',
+        pathname: '/uploads/**',
+      },
     ],
     formats: ['image/webp', 'image/avif'],
+    // 允许未优化的图片以解决本地图片问题
+    unoptimized: true,
+    // 添加本地路径支持
+    domains: [],
   },
   experimental: {
     optimizePackageImports: ['lucide-react'],
