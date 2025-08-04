@@ -51,7 +51,7 @@ export default function Header() {
               href="/about"
               className="text-gray-600 hover:text-gray-900 transition-colors duration-200 font-medium"
             >
-              作者简介
+              我的项目
             </Link>
           </nav>
 
@@ -83,7 +83,7 @@ export default function Header() {
                 className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                作者简介
+                我的项目
               </Link>
             </div>
           </div>

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ExternalLink, Github, Calendar, MapPin, Mail, Phone } from 'lucide-react';
 import SupportButton from '@/components/SupportButton';
+import FollowButton from '@/components/FollowButton';
 
 interface TimelineItem {
   id: string;
@@ -169,53 +170,8 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Timeline */}
-        <section className="py-16 bg-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-serif font-bold text-gray-900 mb-4">
-                成长时光
-              </h2>
-              <p className="text-lg text-gray-600">
-                我的技术成长和职业发展历程
-              </p>
-            </div>
-
-            <div className="relative">
-              {/* Timeline line */}
-              <div className="absolute left-1/2 transform -translate-x-px h-full w-0.5 bg-gray-200"></div>
-              
-              {aboutData.timeline.map((item, index) => (
-                <div key={item.id} className={`relative flex items-center ${index % 2 === 0 ? 'justify-start' : 'justify-end'} mb-12`}>
-                  {/* Timeline dot */}
-                  <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-blue-600 rounded-full border-4 border-white shadow-lg z-10"></div>
-                  
-                  {/* Content */}
-                  <div className={`w-5/12 ${index % 2 === 0 ? 'pr-8 text-right' : 'pl-8 text-left'}`}>
-                    <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-100">
-                      <div className={`flex items-center ${index % 2 === 0 ? 'justify-end' : 'justify-start'} mb-2`}>
-                        <span className="text-2xl font-bold text-blue-600 mr-3">{item.year}</span>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          item.type === 'education' ? 'bg-green-100 text-green-800' :
-                          item.type === 'work' ? 'bg-blue-100 text-blue-800' :
-                          'bg-purple-100 text-purple-800'
-                        }`}>
-                          {item.type === 'education' ? '教育' : 
-                           item.type === 'work' ? '工作' : '成就'}
-                        </span>
-                      </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
-                      <p className="text-gray-600">{item.description}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* Projects */}
-        <section className="py-16 bg-gray-50">
+        <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl font-serif font-bold text-gray-900 mb-4">
@@ -375,6 +331,66 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* Timeline */}
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-serif font-bold text-gray-900 mb-4">
+                成长时光
+              </h2>
+              <p className="text-lg text-gray-600">
+                我的技术成长和职业发展历程
+              </p>
+            </div>
+
+            <div className="relative">
+              {/* Timeline line - 在移动端隐藏 */}
+              <div className="hidden md:block absolute left-1/2 transform -translate-x-px h-full w-0.5 bg-gray-200"></div>
+              
+              {aboutData.timeline.map((item, index) => (
+                <div key={item.id} className={`relative flex items-center mb-12 ${
+                  // 桌面端：奇偶布局，移动端：统一左对齐
+                  'md:' + (index % 2 === 0 ? 'justify-start' : 'justify-end')
+                } justify-start`}>
+                  {/* Timeline dot - 桌面端居中，移动端左侧 */}
+                  <div className={`absolute w-4 h-4 bg-blue-600 rounded-full border-4 border-white shadow-lg z-10 ${
+                    'md:left-1/2 md:transform md:-translate-x-1/2 left-2'
+                  }`}></div>
+                  
+                  {/* Content */}
+                  <div className={`w-full md:w-5/12 ${
+                    // 桌面端：根据奇偶性调整padding和对齐，移动端：统一左padding和左对齐
+                    index % 2 === 0 
+                      ? 'md:pr-8 md:text-right pl-10 md:pl-0 text-left' 
+                      : 'md:pl-8 md:text-left pl-10 text-left'
+                  }`}>
+                    <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-100">
+                      <div className={`flex items-center mb-2 ${
+                        // 桌面端：根据奇偶性调整对齐，移动端：统一左对齐
+                        index % 2 === 0 
+                          ? 'md:justify-end justify-start' 
+                          : 'md:justify-start justify-start'
+                      }`}>
+                        <span className="text-2xl font-bold text-blue-600 mr-3">{item.year}</span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          item.type === 'education' ? 'bg-green-100 text-green-800' :
+                          item.type === 'work' ? 'bg-blue-100 text-blue-800' :
+                          'bg-purple-100 text-purple-800'
+                        }`}>
+                          {item.type === 'education' ? '教育' : 
+                           item.type === 'work' ? '工作' : '成就'}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
+                      <p className="text-gray-600">{item.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Contact Section */}
         <section className="py-16 bg-gray-50">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -394,22 +410,20 @@ export default function AboutPage() {
                     如果您对我的工作感兴趣，或者想要合作交流，欢迎随时联系我
                   </p>
                   
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                     <Link
                       href="/contact"
-                      className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                      className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm w-full sm:w-40"
                     >
                       <Mail className="w-5 h-5 mr-2" />
                       发送消息
                     </Link>
-                    <a
-                      href={`mailto:${aboutData.email || 'contact@ainovalife.com'}`}
-                      className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <Mail className="w-5 h-5 mr-2" />
-                      直接邮件联系
-                    </a>
-                    <SupportButton />
+                    <div className="flex justify-center w-full sm:w-40">
+                      <SupportButton />
+                    </div>
+                    <div className="flex justify-center w-full sm:w-40">
+                      <FollowButton />
+                    </div>
                   </div>
                   
                   {/* Contact info */}
